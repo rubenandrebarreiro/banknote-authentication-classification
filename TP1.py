@@ -399,6 +399,8 @@ def do_logistic_regression():
 
 def do_naive_bayes():
     
+    
+    
     print()
     
 
@@ -410,12 +412,58 @@ def do_naive_bayes():
 
 def compute_gaussian_naive_bayes_errors(gaussian_naive_bayes, xs, ys, train_idx, valid_idx):
     
-    print()
+    gaussian_naive_bayes.fit(xs[train_idx], ys[train_idx])
+    
+    
+    gaussian_naive_bayes_train_accuracy = gaussian_naive_bayes.score(xs[train_idx], ys[train_idx])
+    
+    gaussian_naive_bayes_train_error = ( 1 - gaussian_naive_bayes_train_accuracy )
+
+
+    gaussian_naive_bayes_valid_accuracy = gaussian_naive_bayes.score(xs[valid_idx], ys[valid_idx])
+    
+    gaussian_naive_bayes_valid_error = ( 1 - gaussian_naive_bayes_valid_accuracy )
+
+
+    return gaussian_naive_bayes_train_error, gaussian_naive_bayes_valid_error
 
 
 def do_gaussian_naive_bayes():
     
-    print()
+    print("-----------------------------------------------------------------")
+    print("Starting the Gaussian Naïve Bayes Classifier...")
+    print("-----------------------------------------------------------------")
+    
+    
+    gaussian_naive_bayes_train_error_sum = 0
+    gaussian_naive_bayes_valid_error_sum = 0
+    
+    # The K Folds, for the Stratified K Folds
+    k_folds = skl_model_selection.StratifiedKFold(n_splits = NUM_FOLDS)
+    
+    for train_idx, valid_idx in k_folds.split(ys_train_classes,ys_train_classes):
+            
+        gaussian_naive_bayes = skl_gaussian_naive_bayes()
+        
+        gaussian_naive_bayes_train_error, gaussian_naive_bayes_valid_error = compute_gaussian_naive_bayes_errors(gaussian_naive_bayes, xs_train_features_std, ys_train_classes, train_idx, valid_idx)
+        
+        gaussian_naive_bayes_train_error_sum += gaussian_naive_bayes_train_error
+        gaussian_naive_bayes_valid_error_sum += gaussian_naive_bayes_valid_error
+        
+        
+    gaussian_naive_bayes_train_error_avg_folds = ( gaussian_naive_bayes_train_error_sum / NUM_FOLDS )
+    gaussian_naive_bayes_valid_error_avg_folds = ( gaussian_naive_bayes_valid_error_sum / NUM_FOLDS )
+    
+    print("\n")
+    print("Training Error = {}".format(gaussian_naive_bayes_train_error_avg_folds))
+    print("Validation Error = {}".format(gaussian_naive_bayes_valid_error_avg_folds))
+    print("\n")
+    
+    gaussian_naive_bayes = skl_gaussian_naive_bayes()
+    
+    gaussian_naive_bayes.fit(xs_test_features, ys_test_classes)
+    
+    gaussian_naive_bayes_classification = gaussian_naive_bayes.predict(xs_test_features)
     
 
 
