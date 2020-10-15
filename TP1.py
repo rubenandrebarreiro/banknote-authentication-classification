@@ -312,16 +312,16 @@ def estimate_logistic_regression_true_test_error(xs_train, ys_train, xs_test, ys
 def do_logistic_regression():
     
     print("-----------------------------------------------------------------")
-    print("Starting the Logistic Regression Classifier...")
+    print("1) Starting the Logistic Regression Classifier...")
     print("-----------------------------------------------------------------")    
     
     # The K Folds, for the Stratified K Folds
     k_folds = skl_model_selection.StratifiedKFold(n_splits = NUM_FOLDS)
     
     
-    best_valid_error_avg_folds = 1e10
+    logistic_regression_best_valid_error_avg_folds = 1e10
     
-    best_c_param_value = 1e10
+    logistic_regression_best_c_param_value = 1e10
     
     
     initial_exp_factor = 0
@@ -330,14 +330,14 @@ def do_logistic_regression():
     initial_c_param_value = 1e-2
     
     
-    train_error_values = np.zeros((15,2))
-    valid_error_values = np.zeros((15,2))
+    logistic_regression_train_error_values = np.zeros((15,2))
+    logistic_regression_valid_error_values = np.zeros((15,2))
     
     
     for current_exp_factor in range(initial_exp_factor, final_exp_factor):
     
-        train_error_sum = 0
-        valid_error_sum = 0
+        logistic_regression_train_error_sum = 0
+        logistic_regression_valid_error_sum = 0
         
         current_c_param_value = ( initial_c_param_value * 10**(current_exp_factor) )
         
@@ -346,47 +346,47 @@ def do_logistic_regression():
         
         for train_idx, valid_idx in k_folds.split(ys_train_classes,ys_train_classes):
             
-            train_error, valid_error = compute_logistic_regression_errors(xs_train_features_std, ys_train_classes, train_idx, valid_idx, current_c_param_value, 'brier_score')
+            logistic_regression_train_error, logistic_regression_valid_error = compute_logistic_regression_errors(xs_train_features_std, ys_train_classes, train_idx, valid_idx, current_c_param_value, 'brier_score')
             
-            train_error_sum += train_error
-            valid_error_sum += valid_error
+            logistic_regression_train_error_sum += logistic_regression_train_error
+            logistic_regression_valid_error_sum += logistic_regression_valid_error
             
-        train_error_avg_folds = ( train_error_sum / NUM_FOLDS )
-        valid_error_avg_folds = ( valid_error_sum / NUM_FOLDS )
+        logistic_regression_train_error_avg_folds = ( logistic_regression_train_error_sum / NUM_FOLDS )
+        logistic_regression_valid_error_avg_folds = ( logistic_regression_valid_error_sum / NUM_FOLDS )
         
         
         print("Current Value for Regularization C = {} :".format(current_c_param_value))
-        print("- Training Error = {} ; - Validation Error = {}".format(train_error_avg_folds, valid_error_avg_folds))
+        print("- Training Error = {} ; - Validation Error = {}".format(logistic_regression_train_error_avg_folds, logistic_regression_valid_error_avg_folds))
         print("\n")
         
-        if(best_valid_error_avg_folds > valid_error_avg_folds):
-            best_valid_error_avg_folds = valid_error_avg_folds
-            best_c_param_value = current_c_param_value
+        if(logistic_regression_best_valid_error_avg_folds > logistic_regression_valid_error_avg_folds):
+            logistic_regression_best_valid_error_avg_folds = logistic_regression_valid_error_avg_folds
+            logistic_regression_best_c_param_value = current_c_param_value
             
     
         print("Storing the Training and Validation Errors, for the future Plot of Errors...")
         print("\n")
         
-        train_error_values[current_exp_factor, 0] = np.log(current_c_param_value)
-        train_error_values[current_exp_factor, 1] = train_error_avg_folds
+        logistic_regression_train_error_values[current_exp_factor, 0] = np.log(current_c_param_value)
+        logistic_regression_train_error_values[current_exp_factor, 1] = logistic_regression_train_error_avg_folds
         
-        valid_error_values[current_exp_factor, 0] = np.log(current_c_param_value)
-        valid_error_values[current_exp_factor, 1] = valid_error_avg_folds
+        logistic_regression_valid_error_values[current_exp_factor, 0] = np.log(current_c_param_value)
+        logistic_regression_valid_error_values[current_exp_factor, 1] = logistic_regression_valid_error_avg_folds
         
                 
     print("\n")
-    print("Best Value for Regularization C = {} :".format(best_c_param_value))
-    print("- Best Validation Error = {}".format(best_valid_error_avg_folds))
+    print("Best Value for Regularization C = {} :".format(logistic_regression_best_c_param_value))
+    print("- Best Validation Error = {}".format(logistic_regression_best_valid_error_avg_folds))
     print("\n")
 
 
-    plot_train_valid_error_logistic_regression(train_error_values, valid_error_values)
+    plot_train_valid_error_logistic_regression(logistic_regression_train_error_values, logistic_regression_valid_error_values)
     
-    estimated_true_test_error = estimate_logistic_regression_true_test_error(xs_train_features, ys_train_classes, xs_test_features, ys_test_classes, best_c_param_value, 'brier_score')    
+    logistic_regression_estimated_true_test_error = estimate_logistic_regression_true_test_error(xs_train_features, ys_train_classes, xs_test_features, ys_test_classes, logistic_regression_best_c_param_value, 'brier_score')    
 
 
     print("\n")
-    print("- Estimated True/Test Error = {}".format(estimated_true_test_error))
+    print("- Estimated True/Test Error = {}".format(logistic_regression_estimated_true_test_error))
     
 
 # -----------------------------------------------------
@@ -399,10 +399,9 @@ def do_logistic_regression():
 
 def do_naive_bayes():
     
-    
-    
     print()
     
+
 
 # -----------------------------------------------------
 # \                                                   \
@@ -428,10 +427,27 @@ def compute_gaussian_naive_bayes_errors(gaussian_naive_bayes, xs, ys, train_idx,
     return gaussian_naive_bayes_train_error, gaussian_naive_bayes_valid_error
 
 
+def estimate_gaussian_naive_bayes_true_test_error(xs_test, ys_test):
+    
+    gaussian_naive_bayes = skl_gaussian_naive_bayes()
+    
+    gaussian_naive_bayes.fit(xs_test, ys_test)
+    
+    gaussian_naive_bayes_classification = gaussian_naive_bayes.predict(xs_test)
+    
+
+    gaussian_naive_bayes_true_test_accuracy = gaussian_naive_bayes.score(xs_test, ys_test)
+    
+    gaussian_naive_bayes_true_test_error = ( 1 - gaussian_naive_bayes_true_test_accuracy )
+
+    
+    return gaussian_naive_bayes_true_test_error
+
+
 def do_gaussian_naive_bayes():
     
     print("-----------------------------------------------------------------")
-    print("Starting the Gaussian Naïve Bayes Classifier...")
+    print("3) Starting the Gaussian Naïve Bayes Classifier...")
     print("-----------------------------------------------------------------")
     
     
@@ -440,6 +456,7 @@ def do_gaussian_naive_bayes():
     
     # The K Folds, for the Stratified K Folds
     k_folds = skl_model_selection.StratifiedKFold(n_splits = NUM_FOLDS)
+    
     
     for train_idx, valid_idx in k_folds.split(ys_train_classes,ys_train_classes):
             
@@ -455,17 +472,14 @@ def do_gaussian_naive_bayes():
     gaussian_naive_bayes_valid_error_avg_folds = ( gaussian_naive_bayes_valid_error_sum / NUM_FOLDS )
     
     print("\n")
-    print("Training Error = {}".format(gaussian_naive_bayes_train_error_avg_folds))
-    print("Validation Error = {}".format(gaussian_naive_bayes_valid_error_avg_folds))
+    print("- Training Error = {}".format(gaussian_naive_bayes_train_error_avg_folds))
+    print("- Validation Error = {}".format(gaussian_naive_bayes_valid_error_avg_folds))
     print("\n")
     
-    gaussian_naive_bayes = skl_gaussian_naive_bayes()
-    
-    gaussian_naive_bayes.fit(xs_test_features, ys_test_classes)
-    
-    gaussian_naive_bayes_classification = gaussian_naive_bayes.predict(xs_test_features)
-    
+    estimated_gaussian_naive_bayes_true_test_error = estimate_gaussian_naive_bayes_true_test_error(xs_test_features, ys_test_classes)
 
+    print("\n")
+    print("- Estimated True/Test Error = {}".format(estimated_gaussian_naive_bayes_true_test_error))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
