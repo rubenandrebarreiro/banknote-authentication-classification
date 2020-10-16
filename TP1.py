@@ -3,10 +3,13 @@
 
 Last update on Tue Oct 13 18:00:00 2020
 
-@author: Rúben André Barreiro, 42648, MIEI
+@student-name: Rúben André Barreiro
+@student-number: 42648
 
-NOVA School of Science and Technology (FCT NOVA)
-New University of Lisbon (UNL)
+@degree: Master of Computer Science and Engineering (MIEI)
+
+@college: NOVA School of Science and Technology (FCT NOVA)
+@university: New University of Lisbon (UNL)
 
 """
 
@@ -28,8 +31,8 @@ import sklearn as skl
 # as skl_model_selection 
 from sklearn import model_selection as skl_model_selection
 
-# Import Brier Score Loss (Metrics) Sub-Module, from SciKit-Learn Python's Library,
-# as skl_brier_score_loss
+# Import Brier Score Loss (Metrics) Sub-Module,
+# from SciKit-Learn Python's Library, as skl_brier_score_loss
 from sklearn.metrics import brier_score_loss as skl_brier_score_loss
 
 
@@ -42,12 +45,15 @@ from sklearn.metrics import brier_score_loss as skl_brier_score_loss
 from sklearn.linear_model import LogisticRegression as skl_logistic_regression
 
 # b.2) Naïve Bayes Classifier, with customised KDE (Kernel Density Estimation) 
-# TODO
+
+# Import the Kernel Density (Neighbors) Sub-Module,
+# from SciKit-Learn Python's Library, as kernel_density
+from sklearn.neighbors import KernelDensity as skl_kernel_density
 
 # b.3) Gaussian Naïve Bayes Classifier
 
-# Import Model Selection Sub-Module, from SciKit-Learn,
-# as skl_gaussian_naive_bayes 
+# Import GaussianNB (Naïve Bayes) Sub-Module,
+# from SciKit-Learn Python's Library, as skl_gaussian_naive_bayes 
 from sklearn.naive_bayes import GaussianNB as skl_gaussian_naive_bayes
 
 
@@ -65,12 +71,26 @@ NUM_CLASSES = 2
 # The Number of Folds, for Stratified K Folds, in Cross-Validation
 NUM_FOLDS = 5
 
+# The Number of Steps/Variations for ajusting the C Regularization parameter,
+# for the Logistic Regression
+NUM_STEPS_C_REGULARIZATION_LOGISTIC_REGRESSION = 15
+
+# The Number of Steps/Variations for ajusting the Bandwidth parameter,
+# for the Naïve Bayes
+NUM_STEPS_BANDWIDTH_NAIVE_BAYES = 30
+
+# The Boolean Flag for Debugging
+DEBUG_FLAG = True
+
+
+# The files of the Datasets for Training and Testing
 
 # The Data for Training Set
 train_set_data_file = "files/data/TP1_train.tsv"
 
 # The Data for Testing Set
 test_set_data_file = "files/data/TP1_test.tsv"
+
 
 
 # Load the Data for Training Set with NumPy function loadtxt
@@ -80,28 +100,29 @@ train_set_data_not_random = np.loadtxt(train_set_data_file, delimiter="\t")
 test_set_data_not_random = np.loadtxt(test_set_data_file, delimiter="\t")
 
 
+# If the Boolean Flag for Debugging is set to True,
+# print some relevant information
+if(DEBUG_FLAG == True):
 
-# Print of the Data for Training Set, not randomized
-print("\n")
-print("The Data for Training Set, not randomized:")
-print(train_set_data_not_random)
+    # Print of the Data for Training Set, not randomized
+    print("\n")
+    print("The Data for Training Set, not randomized:")
+    print(train_set_data_not_random)
 
-# Print a new/blank line
-print ("\n")
-
-
-# Print of the Data for Testing Set, not randomized
-print("\n")
-print("The Data for Testing Set, not randomized:")
-print(test_set_data_not_random)
-
-# Print a new/blank line
-print ("\n")
+    # Print a new/blank line
+    print ("\n")
 
 
+    # Print of the Data for Testing Set, not randomized
+    print("\n")
+    print("The Data for Testing Set, not randomized:")
+    print(test_set_data_not_random)
 
-# Print some info about shuffling
-print("Shuffling the Data for Training Set and Testing Set...")
+    # Print a new/blank line
+    print ("\n")
+
+    # Print some info about shuffling
+    print("Shuffling the Data for Training Set and Testing Set...")
 
 
 # Shuffle the Training Set, not randomized
@@ -112,84 +133,96 @@ test_set_data_random = skl.utils.shuffle(test_set_data_not_random)
 
 
 
-# Print of the Data for Training Set, randomized
-print("\n")
-print("The Data for Training Set, randomized:")
-print(train_set_data_random)
+# If the Boolean Flag for Debugging is set to True,
+# print some relevant information
+if(DEBUG_FLAG == True):
 
-# Print a new/blank line
-print ("\n")
+    # Print of the Data for Training Set, randomized
+    print("\n")
+    print("The Data for Training Set, randomized:")
+    print(train_set_data_random)
 
-
-# Print of the Data for Testing Set, randomized
-print("\n")
-print("The Data for Testing Set, randomized:")
-print(test_set_data_random)
-
-# Print a new/blank line
-print ("\n")
+    # Print a new/blank line
+    print ("\n")
 
 
-# Selecting the Classes of the Training Set, randomized
+    # Print of the Data for Testing Set, randomized
+    print("\n")
+    print("The Data for Testing Set, randomized:")
+    print(test_set_data_random)
+
+    # Print a new/blank line
+    print ("\n")
+
+
+# Select the Classes of the Training Set, randomized
 ys_train_classes = train_set_data_random[:,NUM_FEATURES]
 
-# Selecting the Features of the Training Set, randomized
+# Select the Features of the Training Set, randomized
 xs_train_features = train_set_data_random[:,0:NUM_FEATURES]
 
 
-# Print the Classes of the Data for Training Set, randomized
-print("\n")
-print("The Classes of the Data for Training Set, randomized:")
-print(ys_train_classes)
+# If the Boolean Flag for Debugging is set to True,
+# print some relevant information
+if(DEBUG_FLAG == True):
 
-# Print a new/blank line
-print ("\n")
-
-
-# Print the Features of the Data for Training Set, randomized
-print("\n")
-print("The Features of the Data for Training Set, randomized:")
-print(xs_train_features)
-
-# Print a new/blank line
-print ("\n")
+    # Print the Classes of the Data for Training Set, randomized
+    print("\n")
+    print("The Classes of the Data for Training Set, randomized:")
+    print(ys_train_classes)
+    
+    # Print a new/blank line
+    print ("\n")
 
 
-# Selecting the Classes of the Testing Set, randomized
+    # Print the Features of the Data for Training Set, randomized
+    print("\n")
+    print("The Features of the Data for Training Set, randomized:")
+    print(xs_train_features)
+    
+    # Print a new/blank line
+    print ("\n")
+
+
+# Select the Classes of the Testing Set, randomized
 ys_test_classes = test_set_data_random[:,NUM_FEATURES]
 
-# Selecting the Features of the Testing Set, randomized
+# Select the Features of the Testing Set, randomized
 xs_test_features = test_set_data_random[:,0:NUM_FEATURES]
 
 # The size of the Data for Testing Set, randomized
 test_set_size = len(xs_test_features)
 
 
-# Print the Classes of the Data for Testing Set, randomized
-print("\n")
-print("The Classes of the Data for Testing Set, randomized:")
-print(ys_test_classes)
+# If the Boolean Flag for Debugging is set to True,
+# print some relevant information
+if(DEBUG_FLAG == True):
 
-# Print a new/blank line
-print ("\n")
+    # Print the Classes of the Data for Testing Set, randomized
+    print("\n")
+    print("The Classes of the Data for Testing Set, randomized:")
+    print(ys_test_classes)
+    
+    # Print a new/blank line
+    print ("\n")
+    
+    
+    # Print the Features of the Data for Testing Set, randomized
+    print("\n")
+    print("The Features of the Data for Testing Set, randomized:")
+    print(xs_test_features)
+    
+    # Print a new/blank line
+    print ("\n")
 
 
-# Print the Features of the Data for Testing Set, randomized
-print("\n")
-print("The Features of the Data for Testing Set, randomized:")
-print(xs_test_features)
-
-# Print a new/blank line
-print ("\n")
-
-
-# Print the Size of the Data for Testing Set, randomized
-print("\n")
-print("The size of the Testing Set, randomized:")
-print(test_set_size)
-
-# Print a new/blank line
-print ("\n")
+    # Print the Size of the Data for Testing Set, randomized
+    print("\n")
+    print("The size of the Testing Set, randomized:")
+    print(test_set_size)
+    
+    # Print a new/blank line
+    print ("\n")
 
 
 # Computing the Means of the Training Set, randomized
@@ -202,13 +235,17 @@ train_stdevs = np.std(xs_train_features,axis=0)
 xs_train_features_std = ( ( xs_train_features - train_means ) / train_stdevs )
 
 
-# Print the Standardized Features of the Data for Training Set, randomized
-print("\n")
-print("The Standardized Features of the Data for Training Set, randomized:")
-print(xs_train_features_std)
+# If the Boolean Flag for Debugging is set to True,
+# print some relevant information
+if(DEBUG_FLAG == True):
 
-# Print a new/blank line
-print ("\n")
+    # Print the Standardized Features of the Data for Training Set, randomized
+    print("\n")
+    print("The Standardized Features of the Data for Training Set, randomized:")
+    print(xs_train_features_std)
+    
+    # Print a new/blank line
+    print ("\n")
 
 
 # Computing the Means of the Testing Set, randomized
@@ -226,7 +263,8 @@ test_stdevs = np.std(xs_train_features,axis=0)
 # \  varying its Regularization C parameter           \
 # \___________________________________________________\
 
-# Function to Compute and Return  the Errors for Training and Validation Sets 
+# The Function to Compute and Return the Errors for Training and Validation Sets,
+# for the Logistic Regression Classifier
 def compute_logistic_regression_errors(xs, ys, train_idx, valid_idx, c_param_value, score_type = 'brier_score'):
     
     # Initialise the Logistic Regression,
@@ -241,7 +279,8 @@ def compute_logistic_regression_errors(xs, ys, train_idx, valid_idx, c_param_val
     ys_logistic_regression_prediction_probabilities = logistic_regression.predict_proba(xs[:,:NUM_FEATURES])[:,1]
     
     
-    # Compute the Training and Validation Errors, based on a certain type of Scoring
+    # Compute the Training and Validation Errors, based on a certain type of Scoring:
+    # 1) Based on Brier Score
     if(score_type == 'brier_score'):
     
         # Compute the Training Error, related to its Brier Score
@@ -250,7 +289,8 @@ def compute_logistic_regression_errors(xs, ys, train_idx, valid_idx, c_param_val
         # Compute the Validation Error, related to its Brier Score        
         valid_error = skl_brier_score_loss(ys[valid_idx], ys_logistic_regression_prediction_probabilities[valid_idx])
 
-    if(score_type == 'logistic_regression'):
+    # 2) Based on Logistic Regression Score
+    if(score_type == 'logistic_regression_score'):
         
         # Compute the Training Set's Accuracy (Score), for the Logistic Regression
         accuracy_train = logistic_regression.score(xs[train_idx], ys[train_idx])
@@ -269,23 +309,51 @@ def compute_logistic_regression_errors(xs, ys, train_idx, valid_idx, c_param_val
     return train_error, valid_error
 
 
+# The Function to Plot the Training and Validation 
 def plot_train_valid_error_logistic_regression(train_error_values, valid_error_values):
     
+    # Initialise the Plot
     plt.figure(figsize=(8, 8), frameon=True)
+
+    # Set the line representing the continuous values,
+    # for the Functions of the Training and Validation Errors
     plt.plot(train_error_values[:,0], train_error_values[:,1],'-', color="blue")
     plt.plot(valid_error_values[:,0], valid_error_values[:,1],'-', color="red")
     
+    # Set the axis for the Plot
     plt.axis([np.log(1e-2),np.log(1e12),min(valid_error_values[:,1]),max(valid_error_values[:,1])])
+    
+    # Set the laber for the X axis of the Plot
+    plt.xlabel("log(C)")
+    
+    # Set the laber for the Y axis of the Plot
+    plt.ylabel("Training/Validation Errors")
+    
+    # Set the Title of the Plot
     plt.title('Logistic Regression\n\nTraining Error (Blue) / Cross-Validation Error (Red)')
+    
+    # Save the Plot, as a figure/image
     plt.savefig('files/imgs/LR.png', dpi=600)
+    
+    # Show the Plot
     plt.show()
+    
+    # Close the Plot
     plt.close()
 
+
+# The Function to Estimate the True/Test Error of the Testing Set,
+# for the Logistic Regression Classifier
 def estimate_logistic_regression_true_test_error(xs_train, ys_train, xs_test, ys_test, best_c_param_value=1e12, score_type = 'brier_score'):
     
+    # Initialise the Logistic Regression Classifier,
+    # for the Best Regularization C Parameter found
     logistic_regression = skl_logistic_regression(C=best_c_param_value, tol=1e-10)
    
+    # Fit the Logistic Regression Classifier with the Training Set
     logistic_regression.fit(xs_train[:,:NUM_FEATURES], ys_train)
+    
+    # Predict the Probabilities of the Features of the Testing Set, belongs to a certain Class
     ys_logistic_regression_prediction_probabilities = logistic_regression.predict_proba(xs_test[:,:NUM_FEATURES])[:,1]
     
     
@@ -305,103 +373,277 @@ def estimate_logistic_regression_true_test_error(xs_train, ys_train, xs_test, ys
         # Compute the Training Error, regarding its Accuracy (Score)
         estimated_true_test_error = ( 1 - estimated_accuracy_test )
         
-    
+        
+    # Return the Estimated True/Test Error
     return estimated_true_test_error
 
 
+# Perform the Classification Process for
+# the Logistic Regression Classifier
 def do_logistic_regression():
     
     print("-----------------------------------------------------------------")
     print("1) Starting the Logistic Regression Classifier...")
     print("-----------------------------------------------------------------")    
     
-    # The K Folds, for the Stratified K Folds
+    # The K Folds Combinations Model, for the Stratified K Folds process
     k_folds = skl_model_selection.StratifiedKFold(n_splits = NUM_FOLDS)
     
-    
-    logistic_regression_best_valid_error_avg_folds = 1e10
-    
+    # The Best Regularization Parameter C found
     logistic_regression_best_c_param_value = 1e10
     
+    # The Best Average of the Validation Error, for
+    logistic_regression_best_valid_error_avg_folds = 1e10
     
+    
+    # The Initial Exponential Factor, for the Loop
     initial_exp_factor = 0
+    
+    # The Final Exponential Factor, for the Loop
     final_exp_factor = 15
     
+    # The Initial Regularization Parameter C (i.e., 1e-2)
     initial_c_param_value = 1e-2
     
+    # The Values of Training and Validation Errors, for Logistic Regression
+    logistic_regression_train_error_values = np.zeros((NUM_STEPS_C_REGULARIZATION_LOGISTIC_REGRESSION,2))
+    logistic_regression_valid_error_values = np.zeros((NUM_STEPS_C_REGULARIZATION_LOGISTIC_REGRESSION,2))
     
-    logistic_regression_train_error_values = np.zeros((15,2))
-    logistic_regression_valid_error_values = np.zeros((15,2))
     
-    
+    # The loop for try all the Regularization Parameter Cs
     for current_exp_factor in range(initial_exp_factor, final_exp_factor):
     
+        # The sum of the Training and Validation Errors, for Logistic Regression
         logistic_regression_train_error_sum = 0
         logistic_regression_valid_error_sum = 0
         
+        # The current Regularization Parameter C
         current_c_param_value = ( initial_c_param_value * 10**(current_exp_factor) )
+
+
+        # If the Boolean Flag for Debugging is set to True,
+        # print some relevant information
+        if(DEBUG_FLAG == True):
         
-        print("Trying the Regularization Parameter C = {},\nfor Logistic Regression...".format(current_c_param_value))
-        print("\n")
+            # Print the information about
+            # trying a new Regularization Parameter C, for Logistic Regression
+            print("Trying the Regularization Parameter C = {},\nfor Logistic Regression...".format(current_c_param_value))
+            print("\n")
+
         
-        for train_idx, valid_idx in k_folds.split(ys_train_classes,ys_train_classes):
+        # The loop for all the combinations of K Folds, in the Stratified K Folds process
+        for train_idx, valid_idx in k_folds.split(ys_train_classes, ys_train_classes):
             
+            # Compute the Training and Validation Errors, for Logistic Regression
             logistic_regression_train_error, logistic_regression_valid_error = compute_logistic_regression_errors(xs_train_features_std, ys_train_classes, train_idx, valid_idx, current_c_param_value, 'brier_score')
             
+            # Sum the current Training and Validation Errors to the Sums of them
             logistic_regression_train_error_sum += logistic_regression_train_error
             logistic_regression_valid_error_sum += logistic_regression_valid_error
             
+            
+        # Compute the Average of the Sums of the Training and Validation Errors, by the Total Number of Folds 
         logistic_regression_train_error_avg_folds = ( logistic_regression_train_error_sum / NUM_FOLDS )
         logistic_regression_valid_error_avg_folds = ( logistic_regression_valid_error_sum / NUM_FOLDS )
         
+
+        # If the Boolean Flag for Debugging is set to True,
+        # print some relevant information
+        if(DEBUG_FLAG == True):
+            
+            # Print the information about
+            # the Current Value for Regularization Parameter C, for Logistic Regression
+            print("Current Value for Regularization C = {} :".format(current_c_param_value))
+            print("- Training Error = {} ; - Validation Error = {}".format(logistic_regression_train_error_avg_folds, logistic_regression_valid_error_avg_folds))
+            print("\n")
+
         
-        print("Current Value for Regularization C = {} :".format(current_c_param_value))
-        print("- Training Error = {} ; - Validation Error = {}".format(logistic_regression_train_error_avg_folds, logistic_regression_valid_error_avg_folds))
-        print("\n")
-        
+        # Updates the Best Validation Error and also, the Best Regularization C Parameter
         if(logistic_regression_best_valid_error_avg_folds > logistic_regression_valid_error_avg_folds):
             logistic_regression_best_valid_error_avg_folds = logistic_regression_valid_error_avg_folds
             logistic_regression_best_c_param_value = current_c_param_value
             
-    
-        print("Storing the Training and Validation Errors, for the future Plot of Errors...")
-        print("\n")
+
+        # If the Boolean Flag for Debugging is set to True,
+        # print some relevant information
+        if(DEBUG_FLAG == True):
+
+            # Print the information about
+            # Storing the Training and Validation Errors, for the future Plot of Training and Validation Errors
+            print("Storing the Training and Validation Errors, for the future Plot of Training and Validation Errors...")
+            print("\n")
         
+        
+        # Store the Values for x and y, for all the Training Error values,
+        # for the Plot of the Training Errors, as a Function of Logarithm of the C Parameter
         logistic_regression_train_error_values[current_exp_factor, 0] = np.log(current_c_param_value)
         logistic_regression_train_error_values[current_exp_factor, 1] = logistic_regression_train_error_avg_folds
-        
+
+        # Store the Values for x and y, for all the Validation Error values,
+        # for the Plot of the Validation Errors, as a Function of Logarithm of the C Parameter
         logistic_regression_valid_error_values[current_exp_factor, 0] = np.log(current_c_param_value)
         logistic_regression_valid_error_values[current_exp_factor, 1] = logistic_regression_valid_error_avg_folds
         
-                
-    print("\n")
-    print("Best Value for Regularization C = {} :".format(logistic_regression_best_c_param_value))
-    print("- Best Validation Error = {}".format(logistic_regression_best_valid_error_avg_folds))
-    print("\n")
+    
+    # If the Boolean Flag for Debugging is set to True,
+    # print some relevant information
+    if(DEBUG_FLAG == True):            
+
+        # Print the Best Value for the Regularization C Parameter
+        print("\n")
+        print("Best Value for Regularization C = {} :".format(logistic_regression_best_c_param_value))
+        print("- Best Validation Error = {}".format(logistic_regression_best_valid_error_avg_folds))
+        print("\n")
 
 
+    # Plot the Training and Validation Errors, for the Logistic Regression Classifier
     plot_train_valid_error_logistic_regression(logistic_regression_train_error_values, logistic_regression_valid_error_values)
     
+    # Estimate the True/Test Error for the Testing Set,
+    # of the Logistic Regression Classifier
     logistic_regression_estimated_true_test_error = estimate_logistic_regression_true_test_error(xs_train_features, ys_train_classes, xs_test_features, ys_test_classes, logistic_regression_best_c_param_value, 'brier_score')    
 
+    # If the Boolean Flag for Debugging is set to True,
+    # print some relevant information
+    if(DEBUG_FLAG == True):
 
-    print("\n")
-    print("- Estimated True/Test Error = {}".format(logistic_regression_estimated_true_test_error))
+        # Print the Estimated True/Test Error
+        print("\n")
+        print("- Estimated True/Test Error = {}".format(logistic_regression_estimated_true_test_error))
     
 
-# -----------------------------------------------------
-# \                                                   \
-# \  Classifier 2) - Naïve Bayes,                     \
-# \  with customised KDE (Kernel Density Estimation), \
-# \  varying its Bandwidth Regularization parameter   \
-# \___________________________________________________\
+# -------------------------------------------------------
+# \                                                     \
+# \  Classifier 2) - Naïve Bayes,                       \
+# \  with customised KDEs (Kernel Density Estimations), \
+# \  varying its Bandwidth Regularization parameter     \
+# \_____________________________________________________\
 
+# The Function to compute the 
+def compute_naive_bayes_errors(xs, ys, train_idx, valid_idx, bandwidth_param_value):
+    
+    # Initialise the List of Logarithms of Base e of Prior Probabilities of
+    # the Occurrence for each Class, in the Training Set
+    logs_prior_probabilities_occurrences_list = []
+    
+    # Initialise the Kernel Density Estimations (KDEs)
+    kernel_density_estimations_list = []
+    
+    # In order to compute the Errors of the Naïve Bayes,
+    # it's needed to work with each pair of (Class, Feature) 
+    
+    # As, we have 2 classes and 4 features,
+    # we will need a total of 8 Kernel Density Estimations (KDEs)
+    # (2 Classes x 4 Features) = 8 Kernel Density Estimations)
+    
+    # For each possible Class of the Dataset
+    for current_class in range(NUM_CLASSES):
+        
+        #print("frequency")
+        #print(len(xs[ys == current_class])/len(xs))
+        
+        # Compute the Probabilities of the Occurrence for each Class,
+        # in the Training Set
+        prior_probability_occurrences_for_current_class = ( len(xs[ys == current_class]) / len(xs) )
+        
+        # Compute the Logarithm of Base e of Prior Probabilities of
+        # the Occurrence for each Class, in the Training Set, to the respectively List for each Class
+        logs_prior_probabilities_occurrences_list.append(np.log(prior_probability_occurrences_for_current_class))
+        
+        # For each possible Feature of the Dataset
+        for current_feature in range(NUM_FEATURES):
+                        
+            # In the case of the Naïve Bayes, the Classifier needs to
+            # be fit with each pair of (Class, Feature)
+            kernel_density_estimation = skl_kernel_density(bandwidth=bandwidth_param_value, kernel='gaussian')
+                    
+            # Fit the Kernel Density Estimation (KDE), with the Training Set
+            kernel_density_estimation.fit(xs[ys == current_class, current_feature].reshape(-1,1))
+            
+            # Append the current Kernel Density Estimation (KDE)
+            kernel_density_estimations_list.append(kernel_density_estimation)
+    
+    
+    # Initialise the Final List of the Sums of the Classification for
+    # each Class available in the Dataset, for the Naïve Bayes Classifier
+    sum_classification_class_naive_bayes_list = []
+    
+    # For each possible Class of the Dataset
+    for current_class in range(NUM_CLASSES):
+        
+        # For each possible Class of the Dataset
+        for current_feature in range(NUM_FEATURES):
+
+            # Select the current Kernel Density Estimation (KDE), in the index ( current_class + current_feature )            
+            current_kernel_density_estimation = kernel_density_estimations_list[ ( current_class + current_feature ) ]
+                        
+            # Score the Sample of the Pair (Class, Feature), i.e.,
+            # compute the Logarithm of Base e of its Density Probability
+            log_density_score_sample_current_class_feature = current_kernel_density_estimation.score_samples(xs[ys == current_class, current_feature].reshape(-1,1))
+            
+            # Sum the Logarithm of Base e of the Density Probability of
+            # the Sample of the Pair (Class, Feature), i.e., the Score of this Sample
+            logs_prior_probabilities_occurrences_list[current_class] += log_density_score_sample_current_class_feature
+    
+        # Append the Sum of the Classification for
+        # each Class available in the Dataset, for the Naïve Bayes Classifier, to its respective Final List
+        sum_classification_class_naive_bayes_list.append(logs_prior_probabilities_occurrences_list[current_class])
+    
+    #print("Tamanho da Lista de Classificadores")
+    #print(len(sum_classification_class_naive_bayes_list))
+
+    print("Total Classifiers")    
+    print(sum_classification_class_naive_bayes_list[0])
+    print(sum_classification_class_naive_bayes_list[1])
+    
+    sum_classification_class_naive_bayes_max = max(sum_classification_class_naive_bayes_list)
+    
+    return 0, 0
 
 def do_naive_bayes():
     
-    print()
+    print("-----------------------------------------------------------------")
+    print("2) Starting the Naïve Bayes Classifier...")
+    print("-----------------------------------------------------------------")
     
+    
+    # The K Folds Combinations Model, for the Stratified K Folds process
+    k_folds = skl_model_selection.StratifiedKFold(n_splits = NUM_FOLDS)
+    
+    
+    naive_bayes_best_valid_error_avg_folds = 1e10
+    
+    naive_bayes_best_bandwidth_param_value = 1e10
+    
+    
+    naive_bayes_train_error_values = np.zeros((NUM_STEPS_BANDWIDTH_NAIVE_BAYES,2))
+    naive_bayes_valid_error_values = np.zeros((NUM_STEPS_BANDWIDTH_NAIVE_BAYES,2))
+    
+    
+    initial_bandwidth = 2e-2
+    
+    final_bandwidth = 6e-1
+    
+    bandwidth_step = 2e-2
 
+    
+    for current_bandwidth_param_value in np.arange(initial_bandwidth, ( final_bandwidth + bandwidth_step ), bandwidth_step):
+        
+        # The sum of the Training and Validation Errors, for Gaussian Naïve Bayes
+        naive_bayes_train_error_sum = 0
+        naive_bayes_valid_error_sum = 0
+        
+        for train_idx, valid_idx in k_folds.split(ys_train_classes, ys_train_classes):
+            
+            naive_bayes_train_error, naive_bayes_valid_error = compute_naive_bayes_errors(xs_train_features_std, ys_train_classes, train_idx, valid_idx, current_bandwidth_param_value)
+            
+            naive_bayes_train_error_sum += naive_bayes_train_error
+            naive_bayes_valid_error_sum += naive_bayes_valid_error
+            
+        naive_bayes_train_error_avg_folds = ( naive_bayes_train_error_sum / NUM_FOLDS )
+        naive_bayes_valid_error_avg_folds = ( naive_bayes_valid_error_sum / NUM_FOLDS )
+
+        
 
 # -----------------------------------------------------
 # \                                                   \
@@ -409,41 +651,63 @@ def do_naive_bayes():
 # \___________________________________________________\
 
 
+# The Function to Compute and Return the Errors for Training and Validation Sets,
+# for the Gaussian Naïve Bayes Classifier
 def compute_gaussian_naive_bayes_errors(gaussian_naive_bayes, xs, ys, train_idx, valid_idx):
     
+    # Fit the Gaussian Naïve Bayes, with the Training Set
     gaussian_naive_bayes.fit(xs[train_idx], ys[train_idx])
     
-    
+    # Compute the Training Set's Accuracy (Score), for the Gaussian Naïve Bayes    
     gaussian_naive_bayes_train_accuracy = gaussian_naive_bayes.score(xs[train_idx], ys[train_idx])
     
+    # Compute the Training Error, regarding its Accuracy (Score), for the Gaussian Naïve Bayes 
     gaussian_naive_bayes_train_error = ( 1 - gaussian_naive_bayes_train_accuracy )
 
 
+    # Compute the Validation Set's Accuracy (Score),
+    # for the Gaussian Naïve Bayes    
     gaussian_naive_bayes_valid_accuracy = gaussian_naive_bayes.score(xs[valid_idx], ys[valid_idx])
     
+    # Compute the Validation Error, regarding its Accuracy (Score),
+    # for the Gaussian Naïve Bayes 
     gaussian_naive_bayes_valid_error = ( 1 - gaussian_naive_bayes_valid_accuracy )
 
-
+    
+    # Return the Training and Validation Errors, for the Gaussian Naïve Bayes
     return gaussian_naive_bayes_train_error, gaussian_naive_bayes_valid_error
 
 
+# The Function to Estimate the True/Test Error of the Testing Set,
+# for the Gaussian Naïve Bayes Classifier
 def estimate_gaussian_naive_bayes_true_test_error(xs_test, ys_test):
     
+    # Initialise the Gaussian Naïve Bayes Classifier
     gaussian_naive_bayes = skl_gaussian_naive_bayes()
     
+    # Fit the Gaussian Naïve Bayes, with the Testing Set
     gaussian_naive_bayes.fit(xs_test, ys_test)
     
+    # Predict and Classify the Values of the Testing Set,
+    # with the Gaussian Naïve Bayes Classifier
     gaussian_naive_bayes_classification = gaussian_naive_bayes.predict(xs_test)
     
-
+    
+    # Compute the Estimated Testing Set's Accuracy (Score),
+    # for the Gaussian Naïve Bayes    
     gaussian_naive_bayes_true_test_accuracy = gaussian_naive_bayes.score(xs_test, ys_test)
     
+    # Compute the Estimated Testing Error, regarding its Accuracy (Score),
+    # for the Gaussian Naïve Bayes 
     gaussian_naive_bayes_true_test_error = ( 1 - gaussian_naive_bayes_true_test_accuracy )
 
     
+    # Return the Estimated True/Test Error, for the Gaussian Naïve Bayes
     return gaussian_naive_bayes_true_test_error
 
 
+# The Function to Perform the Classification Process for
+# the Gaussian Naïve Bayes Classifier
 def do_gaussian_naive_bayes():
     
     print("-----------------------------------------------------------------")
@@ -451,35 +715,53 @@ def do_gaussian_naive_bayes():
     print("-----------------------------------------------------------------")
     
     
+    # The sum of the Training and Validation Errors, for Gaussian Naïve Bayes
     gaussian_naive_bayes_train_error_sum = 0
     gaussian_naive_bayes_valid_error_sum = 0
     
-    # The K Folds, for the Stratified K Folds
+    # The K Folds Combinations Model, for the Stratified K Folds process
     k_folds = skl_model_selection.StratifiedKFold(n_splits = NUM_FOLDS)
-    
-    
-    for train_idx, valid_idx in k_folds.split(ys_train_classes,ys_train_classes):
-            
+
+        
+    # The loop for all the combinations of K Folds, in the Stratified K Folds process
+    for train_idx, valid_idx in k_folds.split(ys_train_classes, ys_train_classes):
+
+        # Initialise the Gaussian Naïve Bayes Classifier
         gaussian_naive_bayes = skl_gaussian_naive_bayes()
         
+        # Compute the Training and Validation Errors, for Gaussian Naïve Bayes
         gaussian_naive_bayes_train_error, gaussian_naive_bayes_valid_error = compute_gaussian_naive_bayes_errors(gaussian_naive_bayes, xs_train_features_std, ys_train_classes, train_idx, valid_idx)
         
+        # Sum the current Training and Validation Errors to the Sums of them
         gaussian_naive_bayes_train_error_sum += gaussian_naive_bayes_train_error
         gaussian_naive_bayes_valid_error_sum += gaussian_naive_bayes_valid_error
         
         
+    # Compute the Average of the Sums of the Training and Validation Errors, by the Total Number of Folds 
     gaussian_naive_bayes_train_error_avg_folds = ( gaussian_naive_bayes_train_error_sum / NUM_FOLDS )
     gaussian_naive_bayes_valid_error_avg_folds = ( gaussian_naive_bayes_valid_error_sum / NUM_FOLDS )
     
-    print("\n")
-    print("- Training Error = {}".format(gaussian_naive_bayes_train_error_avg_folds))
-    print("- Validation Error = {}".format(gaussian_naive_bayes_valid_error_avg_folds))
-    print("\n")
     
+    # If the Boolean Flag for Debugging is set to True,
+    # print some relevant information
+    if(DEBUG_FLAG == True):   
+        # Print the Training and Validation Errors
+        print("\n")
+        print("- Training Error = {}".format(gaussian_naive_bayes_train_error_avg_folds))
+        print("- Validation Error = {}".format(gaussian_naive_bayes_valid_error_avg_folds))
+        print("\n")
+
+    # Estimate the True/Test Error for the Testing Set,
+    # of the Gaussian Naïve Bayes Classifier
     estimated_gaussian_naive_bayes_true_test_error = estimate_gaussian_naive_bayes_true_test_error(xs_test_features, ys_test_classes)
 
-    print("\n")
-    print("- Estimated True/Test Error = {}".format(estimated_gaussian_naive_bayes_true_test_error))
+    # If the Boolean Flag for Debugging is set to True,
+    # print some relevant information
+    if(DEBUG_FLAG == True):   
+        # Print the Estimated True/Test Error
+        print("\n")
+        print("- Estimated True/Test Error = {}".format(estimated_gaussian_naive_bayes_true_test_error))
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
