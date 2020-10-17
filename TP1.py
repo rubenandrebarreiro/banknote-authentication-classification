@@ -568,27 +568,48 @@ def compute_naive_bayes_errors(xs, ys, train_idx, valid_idx, bandwidth_param_val
     # each Class available in the Dataset, for the Naïve Bayes Classifier
     sum_classification_class_naive_bayes_list = []
     
-    # For each possible Class of the Dataset
-    for current_class in range(NUM_CLASSES):
-        
+    xs_train = xs[train_idx]
+    ys_train = ys[train_idx]
+    
+    xs_valid = xs[valid_idx]
+    ys_valid = ys[valid_idx]
+    
+    # For each Example of the Training Set
+    for current_example in range(len(xs_train)):      
+  
+        x_current_example = xs_train[current_example,:]
+  
         # For each possible Class of the Dataset
-        for current_feature in range(NUM_FEATURES):
+        for current_class in range(NUM_CLASSES):
 
-            # Select the current Kernel Density Estimation (KDE), in the index ( current_class + current_feature )            
-            current_kernel_density_estimation = kernel_density_estimations_list[ ( current_class + current_feature ) ]
-                        
-            # Score the Sample of the Pair (Class, Feature), i.e.,
-            # compute the Logarithm of Base e of its Density Probability
-            log_density_score_sample_current_class_feature = current_kernel_density_estimation.score_samples(xs[ys == current_class, current_feature].reshape(-1,1))
-            
-            # Sum the Logarithm of Base e of the Density Probability of
-            # the Sample of the Pair (Class, Feature), i.e., the Score of this Sample
-            logs_prior_probabilities_occurrences_list[current_class] += log_density_score_sample_current_class_feature
-    
-        # Append the Sum of the Classification for
-        # each Class available in the Dataset, for the Naïve Bayes Classifier, to its respective Final List
-        sum_classification_class_naive_bayes_list.append(logs_prior_probabilities_occurrences_list[current_class])
-    
+            # For each possible Class of the Dataset
+            for current_feature in range(NUM_FEATURES):
+
+                
+                probability_occurrences_for_current_class = ( len(xs_train[ys_train == current_class]) / len(xs_train) )
+                
+                current_example_conditional_probability_feature_knowing_class = ( x_current_example[current_feature] ) / probability_occurrences_for_current_class  
+                
+
+                # Select the current Kernel Density Estimation (KDE), in the index ( current_class + current_feature )            
+                current_kernel_density_estimation = kernel_density_estimations_list[ ( current_class + current_feature ) ]
+                            
+                # Score the Sample of the Pair (Class, Feature), i.e.,
+                # compute the Logarithm of Base e of its Density Probability
+                log_density_probability_score_sample_current_class_feature = current_kernel_density_estimation.score_samples(current_example[current_feature].reshape(-1,1))
+                
+                #print("**************")
+                #print(log_density_probability_score_sample_current_class_feature)
+                #print("**************")
+                
+                # Sum the Logarithm of Base e of the Density Probability of
+                # the Sample of the Pair (Class, Feature), i.e., the Score of this Sample
+                logs_prior_probabilities_occurrences_list[current_class] += log_density_probability_score_sample_current_class_feature
+        
+            # Append the Sum of the Classification for
+            # each Class available in the Dataset, for the Naïve Bayes Classifier, to its respective Final List
+            sum_classification_class_naive_bayes_list.append(logs_prior_probabilities_occurrences_list[current_class])
+        
     #print("Tamanho da Lista de Classificadores")
     #print(len(sum_classification_class_naive_bayes_list))
 
@@ -597,6 +618,9 @@ def compute_naive_bayes_errors(xs, ys, train_idx, valid_idx, bandwidth_param_val
     print(sum_classification_class_naive_bayes_list[1])
     
     sum_classification_class_naive_bayes_max = max(sum_classification_class_naive_bayes_list)
+    sum_classification_class_naive_bayes_argmax = np.argmax(sum_classification_class_naive_bayes_list)
+    
+    print(sum_classification_class_naive_bayes_argmax)
     
     return 0, 0
 
