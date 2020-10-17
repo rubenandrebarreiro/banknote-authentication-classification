@@ -3,7 +3,12 @@
 
 Last update on Tue Oct 13 18:00:00 2020
 
-@student-name: Rúben André Barreiro
+@student-name: Martim Cevadinha Figueiredo
+@student-email: mc.figueiredo@campus.fct.unl.pt
+@student-number: 52701
+
+@student-name: Ruben Andre Barreiro
+@student-email: r.barreiro@campus.fct.unl.pt
 @student-number: 42648
 
 @degree: Master of Computer Science and Engineering (MIEI)
@@ -317,7 +322,7 @@ def compute_logistic_regression_errors(xs, ys, train_idx, valid_idx, c_param_val
     return logistic_regression_train_error, logistic_regression_valid_error
 
 
-# The Function to Plot the Training and Validation 
+# The Function to Plot the Training and Validation, for the Logistic Regression
 def plot_train_valid_error_logistic_regression(train_error_values, valid_error_values):
     
     # Initialise the Plot
@@ -329,7 +334,7 @@ def plot_train_valid_error_logistic_regression(train_error_values, valid_error_v
     plt.plot(valid_error_values[:,0], valid_error_values[:,1],'-', color="red")
     
     # Set the axis for the Plot
-    plt.axis([np.log(1e-2),np.log(1e12),min(valid_error_values[:,1]),max(valid_error_values[:,1])])
+    plt.axis([min(valid_error_values[:,0]), max(valid_error_values[:,0]), min(valid_error_values[:,1]), max(valid_error_values[:,1])])
     
     # Set the laber for the X axis of the Plot
     plt.xlabel("log(C)")
@@ -338,7 +343,7 @@ def plot_train_valid_error_logistic_regression(train_error_values, valid_error_v
     plt.ylabel("Training/Validation Errors")
     
     # Set the Title of the Plot
-    plt.title('Logistic Regression\n\nTraining Error (Blue) / Cross-Validation Error (Red)')
+    plt.title('Logistic Regression, varying the C parameter\n\nTraining Error (Blue) / Cross-Validation Error (Red)')
     
     # Save the Plot, as a figure/image
     plt.savefig('files/imgs/LR.png', dpi=600)
@@ -392,7 +397,8 @@ def do_logistic_regression():
     
     print("-----------------------------------------------------------------")
     print("1) Starting the Logistic Regression Classifier...")
-    print("-----------------------------------------------------------------")    
+    print("-----------------------------------------------------------------")
+    print("\n\n")    
     
     # The K Folds Combinations Model, for the Stratified K Folds process
     k_folds = skl_model_selection.StratifiedKFold(n_splits = NUM_FOLDS)
@@ -678,11 +684,45 @@ def compute_naive_bayes_errors(xs, ys, train_idx, valid_idx, bandwidth_param_val
     return naive_bayes_error_train, naive_bayes_error_valid
 
 
+# The Function to Plot the Training and Validation, for the Naïve Bayes
+def plot_train_valid_error_naive_bayes(train_error_values, valid_error_values):
+    
+    # Initialise the Plot
+    plt.figure(figsize=(8, 8), frameon=True)
+
+    # Set the line representing the continuous values,
+    # for the Functions of the Training and Validation Errors
+    plt.plot(train_error_values[:,0], train_error_values[:,1],'-', color="blue")
+    plt.plot(valid_error_values[:,0], valid_error_values[:,1],'-', color="red")
+    
+    # Set the axis for the Plot
+    plt.axis([min(valid_error_values[:,0]), max(valid_error_values[:,0]), min(valid_error_values[:,1]), max(valid_error_values[:,1])])
+    
+    # Set the laber for the X axis of the Plot
+    plt.xlabel("Bandwidth")
+    
+    # Set the laber for the Y axis of the Plot
+    plt.ylabel("Training/Validation Errors")
+    
+    # Set the Title of the Plot
+    plt.title('Naïve Bayes, with custom Kernel Density Estimations, varying the Bandwidth parameter\n\nTraining Error (Blue) / Cross-Validation Error (Red)')
+    
+    # Save the Plot, as a figure/image
+    plt.savefig('files/imgs/NB.png', dpi=600)
+    
+    # Show the Plot
+    plt.show()
+    
+    # Close the Plot
+    plt.close()
+
+
 def do_naive_bayes():
     
     print("-----------------------------------------------------------------")
     print("2) Starting the Naïve Bayes Classifier...")
     print("-----------------------------------------------------------------")
+    print("\n\n")
     
     
     # The K Folds Combinations Model, for the Stratified K Folds process
@@ -704,7 +744,10 @@ def do_naive_bayes():
     
     bandwidth_step = 2e-2
 
-    
+
+    current_step_bandwidth_naive_bayes = 0
+
+
     for current_bandwidth_param_value in np.arange(initial_bandwidth, ( final_bandwidth + bandwidth_step ), bandwidth_step):
         
         # The sum of the Training and Validation Errors, for Gaussian Naïve Bayes
@@ -731,6 +774,49 @@ def do_naive_bayes():
             print("Current Value for Regularization Bandwidth = {} :".format(current_bandwidth_param_value))
             print("- Training Error = {} ; - Validation Error = {}".format(naive_bayes_train_error_avg_folds, naive_bayes_valid_error_avg_folds))
             print("\n")
+            
+        # Updates the Best Validation Error and also, the Best Regularization Bandwidth Parameter
+        if(naive_bayes_best_valid_error_avg_folds > naive_bayes_valid_error_avg_folds):
+            naive_bayes_best_valid_error_avg_folds = naive_bayes_valid_error_avg_folds
+            naive_bayes_best_bandwidth_param_value = current_bandwidth_param_value
+            
+
+        # If the Boolean Flag for Debugging is set to True,
+        # print some relevant information
+        if(DEBUG_FLAG == True):
+
+            # Print the information about
+            # Storing the Training and Validation Errors, for the future Plot of Training and Validation Errors
+            print("Storing the Training and Validation Errors, for the future Plot of Training and Validation Errors...")
+            print("\n")
+        
+        
+        # Store the Values for x and y, for all the Training Error values,
+        # for the Plot of the Training Errors, as a Function of Logarithm of the Bandwidth Parameter
+        naive_bayes_train_error_values[current_step_bandwidth_naive_bayes, 0] = current_bandwidth_param_value
+        naive_bayes_train_error_values[current_step_bandwidth_naive_bayes, 1] = naive_bayes_train_error_avg_folds
+
+        # Store the Values for x and y, for all the Validation Error values,
+        # for the Plot of the Validation Errors, as a Function of Logarithm of the Bandwidth Parameter
+        naive_bayes_valid_error_values[current_step_bandwidth_naive_bayes, 0] = current_bandwidth_param_value
+        naive_bayes_valid_error_values[current_step_bandwidth_naive_bayes, 1] = naive_bayes_valid_error_avg_folds
+        
+        # Increment the Current Step of the Bandwidth Parameter value
+        current_step_bandwidth_naive_bayes += 1
+    
+    # If the Boolean Flag for Debugging is set to True,
+    # print some relevant information
+    if(DEBUG_FLAG == True):            
+
+        # Print the Best Value for the Regularization Bandwidth Parameter
+        print("\n")
+        print("Best Value for Regularization Bandwidth = {} :".format(naive_bayes_best_bandwidth_param_value))
+        print("- Best Validation Error = {}".format(naive_bayes_best_valid_error_avg_folds))
+        print("\n")
+        
+        
+    # Plot the Training and Validation Errors, for the Naïve Bayes Classifier
+    plot_train_valid_error_naive_bayes(naive_bayes_train_error_values, naive_bayes_valid_error_values)
 
 
 # -----------------------------------------------------
@@ -801,6 +887,7 @@ def do_gaussian_naive_bayes():
     print("-----------------------------------------------------------------")
     print("3) Starting the Gaussian Naïve Bayes Classifier...")
     print("-----------------------------------------------------------------")
+    print("\n\n")
     
     
     # The sum of the Training and Validation Errors, for Gaussian Naïve Bayes
