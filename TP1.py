@@ -538,7 +538,12 @@ def compute_naive_bayes_errors(xs, ys, train_idx, valid_idx, bandwidth_param_val
     
     # Initialise the List of Logarithms of Base e of Prior Probabilities of
     # the Occurrence for each Class, in the Training Set
-    logs_prior_probabilities_classes_occurrences_list = []
+    logs_prior_probabilities_classes_occurrences_train_list = []
+
+    # Initialise the List of Logarithms of Base e of Prior Probabilities of
+    # the Occurrence for each Class, in the Validation Set
+    logs_prior_probabilities_classes_occurrences_valid_list = []
+    
     
     # Initialise the Kernel Density Estimations (KDEs)
     kernel_density_estimations_list = []
@@ -549,17 +554,51 @@ def compute_naive_bayes_errors(xs, ys, train_idx, valid_idx, bandwidth_param_val
     # As, we have 2 classes and 4 features,
     # we will need a total of 8 Kernel Density Estimations (KDEs)
     # (2 Classes x 4 Features) = 8 Kernel Density Estimations)
+
+
+
+    # The Features of the Training Set
+    xs_train = xs[train_idx]
+    
+    # The Classes of the Training Set
+    ys_train = ys[train_idx]
+    
+    # The Number of Samples of the Training Set
+    num_samples_xs_train = len(xs_train)
+    
+
+    # The Features of the Validation Set
+    xs_valid = xs[valid_idx]
+    
+    # The Classes of the Validation Set
+    ys_valid = ys[valid_idx]
+    
+    # The Number of Samples of the Validation Set
+    num_samples_xs_valid = len(xs_valid)
+
+    
+    
     
     # For each possible Class of the Dataset
     for current_class in range(NUM_CLASSES):
         
         # Compute the Probabilities of the Occurrence for each Class,
-        # in the whole Training Set TODO ************
-        prior_probability_occurrences_for_current_class = ( len(xs[ys == current_class]) / len(xs) )
+        # in the whole Training Set
+        prior_probability_occurrences_for_current_class_train = ( len(xs_train[ys_train == current_class]) / num_samples_xs_train )
         
         # Compute the Logarithm of Base e of Prior Probabilities of
         # the Occurrence for each Class, in the Training Set, to the respectively List for each Class
-        logs_prior_probabilities_classes_occurrences_list.append(np.log(prior_probability_occurrences_for_current_class))
+        logs_prior_probabilities_classes_occurrences_train_list.append(np.log(prior_probability_occurrences_for_current_class_train))
+            
+        
+        # Compute the Probabilities of the Occurrence for each Class,
+        # in the whole Validation Set
+        prior_probability_occurrences_for_current_class_valid = ( len(xs_valid[ys_valid == current_class]) / num_samples_xs_valid )
+        
+        # Compute the Logarithm of Base e of Prior Probabilities of
+        # the Occurrence for each Class, in the Validation Set, to the respectively List for each Class
+        logs_prior_probabilities_classes_occurrences_valid_list.append(np.log(prior_probability_occurrences_for_current_class_valid))
+        
         
         # For each possible Feature of the Dataset
         for current_feature in range(NUM_FEATURES):
@@ -575,30 +614,11 @@ def compute_naive_bayes_errors(xs, ys, train_idx, valid_idx, bandwidth_param_val
             kernel_density_estimations_list.append(kernel_density_estimation)
     
     
-         
-    # The Features of the Training Set
-    xs_train = xs[train_idx]
-    
-    # The Classes of the Training Set
-    ys_train = ys[train_idx]
-    
-    # The Number of Samples of the Training Set
-    num_samples_xs_train = len(xs_train)
-    
     # Initialise the array of Probabilities for the Prediction of the Classes,
     # for all the Samples of the Training Set, full of 0s (zeros)
     probabilities_prediction_classes_for_samples_xs_train = np.zeros((num_samples_xs_train, NUM_CLASSES))
     
-    
-    # The Features of the Validation Set
-    xs_valid = xs[valid_idx]
-    
-    # The Classes of the Validation Set
-    ys_valid = ys[valid_idx]
-    
-    # The Number of Samples of the Validation Set
-    num_samples_xs_valid = len(xs_valid)
-    
+        
     # Initialise the array of Probabilities for the Prediction of the Classes,
     # for all the Samples of the Validation Set, full of 0s (zeros)
     probabilities_prediction_classes_for_samples_xs_valid = np.zeros((num_samples_xs_valid, NUM_CLASSES))
@@ -608,12 +628,12 @@ def compute_naive_bayes_errors(xs, ys, train_idx, valid_idx, bandwidth_param_val
     for current_class in range(NUM_CLASSES):
         
         # Update the Probabilities of Prediction of the Classes for Samples of the Training Set,
-        # with the Logarithms of the Prior Probabilities of the Occurrence of the current Class, in the whole Training Set
-        probabilities_prediction_classes_for_samples_xs_train[:, current_class] = logs_prior_probabilities_classes_occurrences_list[current_class] #TODO
+        # with the Logarithms of the Prior Probabilities of the Occurrence of the current Class, in the Training Set
+        probabilities_prediction_classes_for_samples_xs_train[:, current_class] = logs_prior_probabilities_classes_occurrences_train_list[current_class]
 
         # Update the Probabilities of Prediction of the Classes for Samples of the Validation Set,
-        # with the Logarithms of the Prior Probabilities of the Occurrence of the current Class, in the whole Training Set
-        probabilities_prediction_classes_for_samples_xs_valid[:, current_class] = logs_prior_probabilities_classes_occurrences_list[current_class] #TODO
+        # with the Logarithms of the Prior Probabilities of the Occurrence of the current Class, in the Validation Set
+        probabilities_prediction_classes_for_samples_xs_valid[:, current_class] = logs_prior_probabilities_classes_occurrences_valid_list[current_class]
     
         # For each possible Class of the Dataset
         for current_feature in range(NUM_FEATURES):
@@ -640,7 +660,6 @@ def compute_naive_bayes_errors(xs, ys, train_idx, valid_idx, bandwidth_param_val
             probabilities_prediction_classes_for_samples_xs_valid[:, current_class] += log_density_probability_score_samples_current_class_feature_in_xs_validation
         
     
-    
     # The array of the Predictions of the Classes, for the Samples of the Training Set
     predictions_xs_train_samples = np.zeros((num_samples_xs_train))
     
@@ -650,7 +669,6 @@ def compute_naive_bayes_errors(xs, ys, train_idx, valid_idx, bandwidth_param_val
         # Predict the current Sample of the Training Set, as the Maximum Argument (i.e., the Class) of it,
         # i.e. the argument/index with the highest probability of the Predictions of the Classes for each Sample
         predictions_xs_train_samples[current_sample_x_train] = np.argmax( probabilities_prediction_classes_for_samples_xs_train[current_sample_x_train] )
-    
     
     
     # The array of the Predictions of the Classes, for the Samples of the Validation Set
