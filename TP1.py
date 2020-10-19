@@ -23,8 +23,11 @@ Last update on Tue Oct 13 18:00:00 2020
 
 # a) General Libraries:
 
-# Import NumPy Library as np
+# Import NumPy Python's Library as np
 import numpy as np
+
+# Import Math Python's Library as mathematics
+import math as mathematics
 
 # Import PyPlot Sub-Module, from Matplotlib Python's Library as plt
 import matplotlib.pyplot as plt
@@ -653,11 +656,11 @@ def compute_naive_bayes_errors(xs, ys, train_idx, valid_idx, bandwidth_param_val
             
             # Score the Sample of the Pair (Class, Feature), i.e.,
             # compute the Logarithm of Base e of its Density Probability, for the Validation Set
-            log_density_probability_score_samples_current_class_feature_in_xs_validation = current_kernel_density_estimation.score_samples(xs_valid[:, current_feature].reshape(-1,1))
+            log_density_probability_score_samples_current_class_feature_in_xs_valid = current_kernel_density_estimation.score_samples(xs_valid[:, current_feature].reshape(-1,1))
             
             # Sum the Logarithm of Base e of the Density Probability of
             # the Sample of the Pair (Class, Feature), i.e., the Score of the Samples, for the Validation Set
-            probabilities_prediction_classes_for_samples_xs_valid[:, current_class] += log_density_probability_score_samples_current_class_feature_in_xs_validation
+            probabilities_prediction_classes_for_samples_xs_valid[:, current_class] += log_density_probability_score_samples_current_class_feature_in_xs_valid
         
     
     # The array of the Predictions of the Classes, for the Samples of the Training Set
@@ -683,7 +686,7 @@ def compute_naive_bayes_errors(xs, ys, train_idx, valid_idx, bandwidth_param_val
     
 
     # Compute the Accuracy of Score for the Predictions of the Classes for the Training Set  
-    naive_bayes_accuracy_train = skl_accuracy_score(predictions_xs_train_samples, ys_train)
+    naive_bayes_accuracy_train = skl_accuracy_score(ys_train, predictions_xs_train_samples)
     
     # Compute the Training Error, regarding the Accuracy Score for
     # the Predictions of the Classes for the Training Set  
@@ -691,7 +694,7 @@ def compute_naive_bayes_errors(xs, ys, train_idx, valid_idx, bandwidth_param_val
 
        
     # Compute the Accuracy of Score for the Predictions of the Classes for the Validation Set  
-    naive_bayes_accuracy_valid = skl_accuracy_score(predictions_xs_valid_samples, ys_valid)
+    naive_bayes_accuracy_valid = skl_accuracy_score(ys_valid, predictions_xs_valid_samples)
     
     # Compute the Validation Error, regarding the Accuracy Score for
     # the Predictions of the Classes for the Validation Set  
@@ -733,6 +736,110 @@ def plot_train_valid_error_naive_bayes(train_error_values, valid_error_values):
     
     # Close the Plot
     plt.close()
+
+
+# The Function to Estimate the True/Test Error of the Testing Set,
+# for the Naïve Bayes Classifier
+def estimate_naive_bayes_true_test_error(xs_test, ys_test, best_bandwidth_param_value=0.6):
+    
+    # Initialise the List of Logarithms of Base e of Prior Probabilities of
+    # the Occurrence for each Class, in the Testing Set
+    logs_prior_probabilities_classes_occurrences_test_list = []
+    
+    
+    # Initialise the Kernel Density Estimations (KDEs)
+    kernel_density_estimations_list = []
+    
+    # In order to compute the Errors of the Naïve Bayes,
+    # it's needed to work with each pair of (Class, Feature) 
+    
+    # As, we have 2 classes and 4 features,
+    # we will need a total of 8 Kernel Density Estimations (KDEs)
+    # (2 Classes x 4 Features) = 8 Kernel Density Estimations)
+
+
+
+    # The Number of Samples of the Testing Set
+    num_samples_xs_test = len(xs_test)
+    
+    
+    # For each possible Class of the Dataset
+    for current_class in range(NUM_CLASSES):
+        
+        # Compute the Probabilities of the Occurrence for each Class,
+        # in the whole Testing Set
+        prior_probability_occurrences_for_current_class_test = ( len(xs_test[ys_test == current_class]) / num_samples_xs_test )
+        
+        # Compute the Logarithm of Base e of Prior Probabilities of
+        # the Occurrence for each Class, in the Testing Set, to the respectively List for each Class
+        logs_prior_probabilities_classes_occurrences_test_list.append( np.log(prior_probability_occurrences_for_current_class_test) )
+            
+        
+        # For each possible Feature of the Dataset
+        for current_feature in range(NUM_FEATURES):
+                        
+            # In the case of the Naïve Bayes, the Classifier needs to
+            # be fit with each pair of (Class, Feature)
+            kernel_density_estimation = skl_kernel_density(bandwidth=best_bandwidth_param_value, kernel='gaussian')
+                    
+            # Fit the Kernel Density Estimation (KDE), with the Training Set
+            kernel_density_estimation.fit(xs_test[ys_test == current_class, current_feature].reshape(-1,1))
+            
+            # Append the current Kernel Density Estimation (KDE)
+            kernel_density_estimations_list.append(kernel_density_estimation)
+    
+    
+    # Initialise the array of Probabilities for the Prediction of the Classes,
+    # for all the Samples of the Testing Set, full of 0s (zeros)
+    probabilities_prediction_classes_for_samples_xs_test = np.zeros((num_samples_xs_test, NUM_CLASSES))
+    
+    
+    # For each possible Class of the Dataset
+    for current_class in range(NUM_CLASSES):
+        
+        # Update the Probabilities of Prediction of the Classes for Samples of the Testing Set,
+        # with the Logarithms of the Prior Probabilities of the Occurrence of the current Class, in the Testing Set
+        probabilities_prediction_classes_for_samples_xs_test[:, current_class] = logs_prior_probabilities_classes_occurrences_test_list[current_class]
+
+
+        # For each possible Class of the Dataset
+        for current_feature in range(NUM_FEATURES):
+            
+            # Select the current Kernel Density Estimation (KDE), in the index ( current_class + current_feature )            
+            current_kernel_density_estimation = kernel_density_estimations_list[ ( current_class + current_feature ) ]
+    
+                    
+            # Score the Sample of the Pair (Class, Feature), i.e.,
+            # compute the Logarithm of Base e of its Density Probability, for the Testing Set
+            log_density_probability_score_samples_current_class_feature_in_xs_test = current_kernel_density_estimation.score_samples(xs_test[:, current_feature].reshape(-1,1))
+            
+            # Sum the Logarithm of Base e of the Density Probability of
+            # the Sample of the Pair (Class, Feature), i.e., the Score of the Samples, for the Testing Set
+            probabilities_prediction_classes_for_samples_xs_test[:, current_class] += log_density_probability_score_samples_current_class_feature_in_xs_test
+    
+        
+    
+    # The array of the Predictions of the Classes, for the Samples of the Testing Set
+    predictions_xs_test_samples = np.zeros((num_samples_xs_test))
+    
+    # For each Sample of the Testing Set, try to predict its Class
+    for current_sample_x_test in range(num_samples_xs_test):
+        
+        # Predict the current Sample of the Testing Set, as the Maximum Argument (i.e., the Class) of it,
+        # i.e. the argument/index with the highest probability of the Predictions of the Classes for each Sample
+        predictions_xs_test_samples[current_sample_x_test] = np.argmax( probabilities_prediction_classes_for_samples_xs_test[current_sample_x_test] )
+    
+    
+    # Compute the Accuracy of Score for the Predictions of the Classes for the Testing Set  
+    naive_bayes_estimated_accuracy_test = skl_accuracy_score(ys_test, predictions_xs_test_samples)
+    
+    # Compute the Estimated True Testing Error, regarding the Accuracy Score for
+    # the Predictions of the Classes for the Testing Set  
+    naive_bayes_estimated_true_error_test = ( 1 - naive_bayes_estimated_accuracy_test )
+    
+    
+    # Return the True Testing Errors for the Naïve Bayes
+    return naive_bayes_estimated_true_error_test
 
 
 def do_naive_bayes():
@@ -835,6 +942,18 @@ def do_naive_bayes():
         
     # Plot the Training and Validation Errors, for the Naïve Bayes Classifier
     plot_train_valid_error_naive_bayes(naive_bayes_train_error_values, naive_bayes_valid_error_values)
+    
+    # Estimate the True/Test Error for the Testing Set,
+    # of the Naïve Bayes Regression Classifier
+    naive_bayes_estimated_true_test_error = estimate_naive_bayes_true_test_error(xs_test_features, ys_test_classes, naive_bayes_best_bandwidth_param_value)    
+
+    # If the Boolean Flag for Debugging is set to True,
+    # print some relevant information
+    if(DEBUG_FLAG == True):
+
+        # Print the Estimated True/Test Error
+        print("\n")
+        print("- Estimated True/Test Error = {}".format(naive_bayes_estimated_true_test_error))
 
 
 # -----------------------------------------------------
@@ -881,9 +1000,8 @@ def estimate_gaussian_naive_bayes_true_test_error(xs_test, ys_test):
     gaussian_naive_bayes.fit(xs_test, ys_test)
     
     # Predict and Classify the Values of the Testing Set,
-    # with the Gaussian Naïve Bayes Classifier
-    gaussian_naive_bayes_classification = gaussian_naive_bayes.predict(xs_test)
-    
+    # with the Gaussian Naïve Bayes Classifier TODO Confirmar
+    prediction_classes_for_samples_xs_test = gaussian_naive_bayes.predict(xs_test)
     
     # Compute the Estimated Testing Set's Accuracy (Score),
     # for the Gaussian Naïve Bayes    
@@ -955,10 +1073,57 @@ def do_gaussian_naive_bayes():
         print("\n")
         print("- Estimated True/Test Error = {}".format(estimated_gaussian_naive_bayes_true_test_error))
 
+    # TODO
+    num_samples_test_set = len(xs_test_features)  
+
+    aproximate_normal_test(xs_test_features)
+    
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+# --------------------------------------------------------
+# \                                                      \
+# \  4) Comparing the Classifiers:                       \
+# \     a) Logistic Regression,                          \
+# \        varying the C Regularization Parameter        \
+# \     b) Naïve Bayes,                                  \
+# \        with custom KDEs (Kernel Density Estimations) \
+# \        varying the Bandwidth Parameter               \
+# \     c) Gaussian Naïve Bayes,                         \
+# \        varying the Bandwidth Parameter               \
+# \                                                      \
+# \  - 4.1) Comparing Aproximate Normal Test             \
+# \______________________________________________________\
+
+def aproximate_normal_test(num_real_errors, probability_making_error, num_samples_test_set):
+
+    expected_num_errors = ( probability_making_error * num_samples_test_set )
     
+    
+    probability_not_making_error = ( 1 - probability_making_error )
+    
+    difference_num_errors = ( num_real_errors - expected_num_errors )
+    sqrt_expected_num_errors_mult_probability_not_making_error = mathematics.sqrt( expected_num_errors * probability_not_making_error )
+
+    aproximate_normal_test_value = ( difference_num_errors / sqrt_expected_num_errors_mult_probability_not_making_error )
+    
+    
+    probability_occurrence_real_errors_in_test_set = ( num_real_errors / num_samples_test_set )
+    
+    probability_not_occurrence_real_errors_in_test_set = ( 1 - probability_occurrence_real_errors_in_test_set )
+    
+    
+    aproximate_normal_test_std_deviation = mathematics.sqrt( num_samples_test_set * probability_occurrence_real_errors_in_test_set * probability_not_occurrence_real_errors_in_test_set )
+    
+    aproximate_normal_test_deviation_lower_bound = ( -1 * 1.96 * aproximate_normal_test_std_deviation )
+    aproximate_normal_test_deviation_upper_bound = ( 1.96 * aproximate_normal_test_std_deviation )
+
+        
+    return aproximate_normal_test_value, aproximate_normal_test_deviation_lower_bound, aproximate_normal_test_deviation_upper_bound
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 # ---- Run the 3 Classifiers: ------
 
