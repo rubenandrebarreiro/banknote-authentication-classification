@@ -264,7 +264,6 @@ if(DEBUG_FLAG == True):
     print ("\n")
 
 
-# TODO
 # Computing the Means of the Testing Set, randomized
 test_means = np.mean(xs_train_features,axis=0)
 
@@ -373,6 +372,10 @@ def estimate_logistic_regression_true_test_error(xs_train, ys_train, xs_test, ys
     # Predict the Probabilities of the Features of the Testing Set, belongs to a certain Class
     ys_logistic_regression_prediction_probabilities = logistic_regression.predict_proba(xs_test[:,:NUM_FEATURES])[:,1]
     
+    # Predict and Classify the Values of the Testing Set,
+    # with the Logistic Regression Classifier TODO Confirmar
+    logistic_regression_prediction_classes_for_samples_xs_test = logistic_regression.predict(xs_test)
+    
     
     # Estimate the Testing Error, based on a certain type of Scoring
     # 1) Brier Scoring
@@ -389,10 +392,28 @@ def estimate_logistic_regression_true_test_error(xs_train, ys_train, xs_test, ys
     
         # Compute the Training Error, regarding its Accuracy (Score)
         estimated_true_test_error = ( 1 - estimated_accuracy_test )
+    
+    
+    # The Number of Samples, from the Testing Set 
+    num_samples_test_set = len(xs_test)
+
+    # The Real Number of Incorrect Predictions, regarding the Logistic Regression Classifier
+    real_logistic_regression_num_incorrect_predictions = 0
+    
+    # For each Sample, from the Testing Set
+    for current_sample_test in range(num_samples_test_set):
         
-        
-    # Return the Estimated True/Test Error
-    return estimated_true_test_error
+        # If the Prediction/Classification of the Class for the current Sample,
+        # of the Testing Set is different from the Real Class of the same,
+        # it's considered an Real Error in Prediction/Classification,
+        # regarding the Logistic Regression Classifier
+        if(logistic_regression_prediction_classes_for_samples_xs_test[current_sample_test] != ys_test[current_sample_test] ):
+            real_logistic_regression_num_incorrect_predictions += 1
+            
+    
+    # Return the Real Number of Incorrect Predictions and the Estimated True/Test Error,
+    # for the Logistic Regression Classifier
+    return real_logistic_regression_num_incorrect_predictions, estimated_true_test_error
 
 
 # Perform the Classification Process for
@@ -516,10 +537,10 @@ def do_logistic_regression():
 
     # Plot the Training and Validation Errors, for the Logistic Regression Classifier
     plot_train_valid_error_logistic_regression(logistic_regression_train_error_values, logistic_regression_valid_error_values)
-    
-    # Estimate the True/Test Error for the Testing Set,
-    # of the Logistic Regression Classifier
-    logistic_regression_estimated_true_test_error = estimate_logistic_regression_true_test_error(xs_train_features, ys_train_classes, xs_test_features, ys_test_classes, logistic_regression_best_c_param_value, 'brier_score')    
+
+    # Compute the Real Number of Incorrect Predictions and the Estimated True/Test Error,
+    # of the Testing Set, for the Logistic Regression Classifier
+    real_logistic_regression_num_incorrect_predictions, estimated_logistic_regression_true_test_error = estimate_logistic_regression_true_test_error(xs_train_features, ys_train_classes, xs_test_features, ys_test_classes, logistic_regression_best_c_param_value, 'brier_score')    
 
     # If the Boolean Flag for Debugging is set to True,
     # print some relevant information
@@ -527,7 +548,23 @@ def do_logistic_regression():
 
         # Print the Estimated True/Test Error
         print("\n")
-        print("- Estimated True/Test Error = {}".format(logistic_regression_estimated_true_test_error))
+        print("- Estimated True/Test Error = {}".format(estimated_logistic_regression_true_test_error))
+    
+    
+    # The number of the Samples, from the Testing Set
+    num_samples_test_set = len(xs_test_features)  
+
+    # Computes the Aproximate Normal Test, for the Logistic Regression Classifier
+    logistic_regression_aproximate_normal_test_deviation_lower_bound, logistic_regression_aproximate_normal_test_deviation_upper_bound = aproximate_normal_test(real_logistic_regression_num_incorrect_predictions, estimated_logistic_regression_true_test_error, num_samples_test_set)
+    
+    # If the Boolean Flag for Debugging is set to True,
+    # print some relevant information
+    if(DEBUG_FLAG == True):   
+        # Print the Approximate Normal Test, with Confidence Level of 95% and
+        # its Interval range of values, for the Test itself
+        print("\n")
+        print("- Approximate Normal Test, with Confidence Level of 95% = [ {} - {} ; {} + {} ]".format(real_logistic_regression_num_incorrect_predictions, logistic_regression_aproximate_normal_test_deviation_upper_bound, real_logistic_regression_num_incorrect_predictions, logistic_regression_aproximate_normal_test_deviation_upper_bound))
+        print("- Approximate Normal Test Interval = [ {} ; {} ]".format( ( real_logistic_regression_num_incorrect_predictions + logistic_regression_aproximate_normal_test_deviation_lower_bound ) , ( real_logistic_regression_num_incorrect_predictions + logistic_regression_aproximate_normal_test_deviation_upper_bound ) ))
     
 
 # -------------------------------------------------------
@@ -821,26 +858,47 @@ def estimate_naive_bayes_true_test_error(xs_test, ys_test, best_bandwidth_param_
         
     
     # The array of the Predictions of the Classes, for the Samples of the Testing Set
-    predictions_xs_test_samples = np.zeros((num_samples_xs_test))
+    naive_bayes_prediction_classes_for_samples_xs_test = np.zeros((num_samples_xs_test))
     
     # For each Sample of the Testing Set, try to predict its Class
     for current_sample_x_test in range(num_samples_xs_test):
         
         # Predict the current Sample of the Testing Set, as the Maximum Argument (i.e., the Class) of it,
         # i.e. the argument/index with the highest probability of the Predictions of the Classes for each Sample
-        predictions_xs_test_samples[current_sample_x_test] = np.argmax( probabilities_prediction_classes_for_samples_xs_test[current_sample_x_test] )
+        naive_bayes_prediction_classes_for_samples_xs_test[current_sample_x_test] = np.argmax( probabilities_prediction_classes_for_samples_xs_test[current_sample_x_test] )
     
     
     # Compute the Accuracy of Score for the Predictions of the Classes for the Testing Set  
-    naive_bayes_estimated_accuracy_test = skl_accuracy_score(ys_test, predictions_xs_test_samples)
+    naive_bayes_estimated_accuracy_test = skl_accuracy_score(ys_test, naive_bayes_prediction_classes_for_samples_xs_test)
     
     # Compute the Estimated True Testing Error, regarding the Accuracy Score for
     # the Predictions of the Classes for the Testing Set  
     naive_bayes_estimated_true_error_test = ( 1 - naive_bayes_estimated_accuracy_test )
     
     
-    # Return the True Testing Errors for the Naïve Bayes
-    return naive_bayes_estimated_true_error_test
+    # The Number of Samples, from the Testing Set 
+    num_samples_test_set = len(xs_test)
+
+    # The Real Number of Incorrect Predictions,
+    # regarding the Naïve Bayes Classifier,
+    # with custom KDEs (Kernel Density Estimations)
+    real_naive_bayes_num_incorrect_predictions = 0
+    
+    # For each Sample, from the Testing Set
+    for current_sample_test in range(num_samples_test_set):
+        
+        # If the Prediction/Classification of the Class for the current Sample,
+        # of the Testing Set is different from the Real Class of the same,
+        # it's considered an Real Error in Prediction/Classification,
+        # regarding the Naïve Bayes Classifier,
+        # with custom KDEs (Kernel Density Estimations)
+        if(naive_bayes_prediction_classes_for_samples_xs_test[current_sample_test] != ys_test[current_sample_test] ):
+            real_naive_bayes_num_incorrect_predictions += 1
+    
+    
+    # Return the Real Number of Incorrect Predictions and the Estimated True/Test Error,
+    # for the Naïve Bayes Classifier, with custom KDEs (Kernel Density Estimations)
+    return real_naive_bayes_num_incorrect_predictions, naive_bayes_estimated_true_error_test
 
 
 def do_naive_bayes():
@@ -944,9 +1002,11 @@ def do_naive_bayes():
     # Plot the Training and Validation Errors, for the Naïve Bayes Classifier
     plot_train_valid_error_naive_bayes(naive_bayes_train_error_values, naive_bayes_valid_error_values)
     
-    # Estimate the True/Test Error for the Testing Set,
-    # of the Naïve Bayes Regression Classifier
-    naive_bayes_estimated_true_test_error = estimate_naive_bayes_true_test_error(xs_test_features, ys_test_classes, naive_bayes_best_bandwidth_param_value)    
+    # Compute the Real Number of Incorrect Predictions and the Estimated True/Test Error,
+    # for the Testing Set, of the Naïve Bayes Regression Classifier,
+    # with custom KDEs (Kernel Density Estimations)
+    real_naive_bayes_num_incorrect_predictions, estimated_naive_bayes_true_test_error = estimate_naive_bayes_true_test_error(xs_test_features, ys_test_classes, naive_bayes_best_bandwidth_param_value)    
+    
 
     # If the Boolean Flag for Debugging is set to True,
     # print some relevant information
@@ -954,8 +1014,26 @@ def do_naive_bayes():
 
         # Print the Estimated True/Test Error
         print("\n")
-        print("- Estimated True/Test Error = {}".format(naive_bayes_estimated_true_test_error))
+        print("- Estimated True/Test Error = {}".format(estimated_naive_bayes_true_test_error))
+    
+    
+    # The number of the Samples, from the Testing Set
+    num_samples_test_set = len(xs_test_features)  
 
+    # Computes the Aproximate Normal Test,
+    # for the Naïve Bayes Classifier,
+    # with custom KDEs (Kernel Density Estimations)
+    naive_bayes_aproximate_normal_test_deviation_lower_bound, naive_bayes_aproximate_normal_test_deviation_upper_bound = aproximate_normal_test(real_naive_bayes_num_incorrect_predictions, estimated_naive_bayes_true_test_error, num_samples_test_set)
+    
+    # If the Boolean Flag for Debugging is set to True,
+    # print some relevant information
+    if(DEBUG_FLAG == True):   
+        # Print the Approximate Normal Test, with Confidence Level of 95% and
+        # its Interval range of values, for the Test itself
+        print("\n")
+        print("- Approximate Normal Test, with Confidence Level of 95% = [ {} - {} ; {} + {} ]".format(real_naive_bayes_num_incorrect_predictions, naive_bayes_aproximate_normal_test_deviation_upper_bound, real_naive_bayes_num_incorrect_predictions, naive_bayes_aproximate_normal_test_deviation_upper_bound))
+        print("- Approximate Normal Test Interval = [ {} ; {} ]".format( ( real_naive_bayes_num_incorrect_predictions + naive_bayes_aproximate_normal_test_deviation_lower_bound ) , ( real_naive_bayes_num_incorrect_predictions + naive_bayes_aproximate_normal_test_deviation_upper_bound ) ))
+        
 
 # -----------------------------------------------------
 # \                                                   \
@@ -1002,7 +1080,7 @@ def estimate_gaussian_naive_bayes_true_test_error(xs_test, ys_test):
     
     # Predict and Classify the Values of the Testing Set,
     # with the Gaussian Naïve Bayes Classifier TODO Confirmar
-    prediction_classes_for_samples_xs_test = gaussian_naive_bayes.predict(xs_test)
+    gaussian_naive_bayes_prediction_classes_for_samples_xs_test = gaussian_naive_bayes.predict(xs_test)
     
     # Compute the Estimated Testing Set's Accuracy (Score),
     # for the Gaussian Naïve Bayes    
@@ -1012,27 +1090,24 @@ def estimate_gaussian_naive_bayes_true_test_error(xs_test, ys_test):
     # for the Gaussian Naïve Bayes 
     gaussian_naive_bayes_true_test_error = ( 1 - gaussian_naive_bayes_true_test_accuracy )    
     
-    print("************")    
-    print("predictions")
-    print(prediction_classes_for_samples_xs_test)
-    print("reals")
-    print(ys_test)
-    print("************")
     
-    
+    # The Number of Samples, from the Testing Set 
     num_samples_test_set = len(xs_test)
 
-    # Compute the Real Number of Incorrect Predictions, regarding the Estimated Testing Error
+    # The Number of Incorrect Predictions, regarding the Gaussian Naïve Bayes Classifier
     real_gaussian_naive_bayes_num_incorrect_predictions = 0
     
+    # For each Sample, from the Testing Set
     for current_sample_test in range(num_samples_test_set):
-        if(prediction_classes_for_samples_xs_test[current_sample_test] != ys_test[current_sample_test] ):
+        
+        # If the Prediction/Classification of the Class for the current Sample,
+        # of the Testing Set is different from the Real Class of the same,
+        # it's considered an Real Error in Prediction/Classification,
+        # regarding the Gaussian Naïve Bayes Classifier
+        if(gaussian_naive_bayes_prediction_classes_for_samples_xs_test[current_sample_test] != ys_test[current_sample_test] ):
             real_gaussian_naive_bayes_num_incorrect_predictions += 1
             
     
-    print("num real incorretos")
-    print(real_gaussian_naive_bayes_num_incorrect_predictions)
-
     # Return the Real Number of Incorrect Prediction and the Estimated True/Testing Error,
     # in the Testing Set, for the Gaussian Naïve Bayes
     return real_gaussian_naive_bayes_num_incorrect_predictions, gaussian_naive_bayes_true_test_error
@@ -1084,9 +1159,9 @@ def do_gaussian_naive_bayes():
         print("- Validation Error = {}".format(gaussian_naive_bayes_valid_error_avg_folds))
         print("\n")
 
-    # Estimate the Estimated Number of Incorrect Predictions and the True/Test Error,
+    # Compute the Real Number of Incorrect Predictions and the Estimated True/Test Error,
     # of the Testing Set, for the Gaussian Naïve Bayes Classifier
-    estimated_gaussian_naive_bayes_num_incorrect_predictions, estimated_gaussian_naive_bayes_true_test_error = estimate_gaussian_naive_bayes_true_test_error(xs_test_features, ys_test_classes)
+    real_gaussian_naive_bayes_num_incorrect_predictions, estimated_gaussian_naive_bayes_true_test_error = estimate_gaussian_naive_bayes_true_test_error(xs_test_features, ys_test_classes)
 
     # If the Boolean Flag for Debugging is set to True,
     # print some relevant information
@@ -1099,8 +1174,8 @@ def do_gaussian_naive_bayes():
     # The number of the Samples, from the Testing Set
     num_samples_test_set = len(xs_test_features)  
 
-    # Computes the Aproximate Normal Test, for the Gaussain Naïve Bayes Classifier
-    gaussian_naive_bayes_aproximate_normal_test_value, gaussian_naive_bayes_aproximate_normal_test_deviation_lower_bound, gaussian_naive_bayes_aproximate_normal_test_deviation_upper_bound = aproximate_normal_test(estimated_gaussian_naive_bayes_num_incorrect_predictions, estimated_gaussian_naive_bayes_true_test_error, num_samples_test_set)
+    # Computes the Aproximate Normal Test, for the Gaussian Naïve Bayes Classifier
+    gaussian_naive_bayes_aproximate_normal_test_deviation_lower_bound, gaussian_naive_bayes_aproximate_normal_test_deviation_upper_bound = aproximate_normal_test(real_gaussian_naive_bayes_num_incorrect_predictions, estimated_gaussian_naive_bayes_true_test_error, num_samples_test_set)
     
     # If the Boolean Flag for Debugging is set to True,
     # print some relevant information
@@ -1108,8 +1183,8 @@ def do_gaussian_naive_bayes():
         # Print the Approximate Normal Test, with Confidence Level of 95% and
         # its Interval range of values, for the Test itself
         print("\n")
-        print("- Approximate Normal Test, with Confidence Level of 95% = [ {} - {} ; {} + {} ]".format(gaussian_naive_bayes_aproximate_normal_test_value, gaussian_naive_bayes_aproximate_normal_test_deviation_upper_bound, gaussian_naive_bayes_aproximate_normal_test_value, gaussian_naive_bayes_aproximate_normal_test_deviation_upper_bound))
-        print("- Approximate Normal Test Interval = [ {} ; {} ]".format( ( gaussian_naive_bayes_aproximate_normal_test_value + gaussian_naive_bayes_aproximate_normal_test_deviation_lower_bound ) , ( gaussian_naive_bayes_aproximate_normal_test_value + gaussian_naive_bayes_aproximate_normal_test_deviation_upper_bound ) ))
+        print("- Approximate Normal Test, with Confidence Level of 95% = [ {} - {} ; {} + {} ]".format(real_gaussian_naive_bayes_num_incorrect_predictions, gaussian_naive_bayes_aproximate_normal_test_deviation_upper_bound, real_gaussian_naive_bayes_num_incorrect_predictions, gaussian_naive_bayes_aproximate_normal_test_deviation_upper_bound))
+        print("- Approximate Normal Test Interval = [ {} ; {} ]".format( ( real_gaussian_naive_bayes_num_incorrect_predictions + gaussian_naive_bayes_aproximate_normal_test_deviation_lower_bound ) , ( real_gaussian_naive_bayes_num_incorrect_predictions + gaussian_naive_bayes_aproximate_normal_test_deviation_upper_bound ) ))
         
     
 
@@ -1131,15 +1206,15 @@ def do_gaussian_naive_bayes():
 
 def aproximate_normal_test(num_real_errors, probability_making_error, num_samples_test_set):
 
-    expected_num_errors = ( probability_making_error * num_samples_test_set )
+    #expected_num_errors = ( probability_making_error * num_samples_test_set )
     
     
-    probability_not_making_error = ( 1 - probability_making_error )
+    #probability_not_making_error = ( 1 - probability_making_error )
     
-    difference_num_errors = ( num_real_errors - expected_num_errors )
-    sqrt_expected_num_errors_mult_probability_not_making_error = mathematics.sqrt( expected_num_errors * probability_not_making_error )
+    #difference_num_errors = ( num_real_errors - expected_num_errors )
+    #sqrt_expected_num_errors_mult_probability_not_making_error = mathematics.sqrt( expected_num_errors * probability_not_making_error )
 
-    aproximate_normal_test_value = ( difference_num_errors / sqrt_expected_num_errors_mult_probability_not_making_error )
+    #aproximate_normal_test_value = ( difference_num_errors / sqrt_expected_num_errors_mult_probability_not_making_error )
     
     
     probability_occurrence_real_errors_in_test_set = ( num_real_errors / num_samples_test_set )
@@ -1153,7 +1228,7 @@ def aproximate_normal_test(num_real_errors, probability_making_error, num_sample
     aproximate_normal_test_deviation_upper_bound = ( 1.96 * aproximate_normal_test_std_deviation )
 
         
-    return aproximate_normal_test_value, aproximate_normal_test_deviation_lower_bound, aproximate_normal_test_deviation_upper_bound
+    return aproximate_normal_test_deviation_lower_bound, aproximate_normal_test_deviation_upper_bound
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
