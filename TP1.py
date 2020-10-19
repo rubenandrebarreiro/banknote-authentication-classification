@@ -264,6 +264,7 @@ if(DEBUG_FLAG == True):
     print ("\n")
 
 
+# TODO
 # Computing the Means of the Testing Set, randomized
 test_means = np.mean(xs_train_features,axis=0)
 
@@ -1009,11 +1010,32 @@ def estimate_gaussian_naive_bayes_true_test_error(xs_test, ys_test):
     
     # Compute the Estimated Testing Error, regarding its Accuracy (Score),
     # for the Gaussian Naïve Bayes 
-    gaussian_naive_bayes_true_test_error = ( 1 - gaussian_naive_bayes_true_test_accuracy )
-
+    gaussian_naive_bayes_true_test_error = ( 1 - gaussian_naive_bayes_true_test_accuracy )    
     
-    # Return the Estimated True/Test Error, for the Gaussian Naïve Bayes
-    return gaussian_naive_bayes_true_test_error
+    print("************")    
+    print("predictions")
+    print(prediction_classes_for_samples_xs_test)
+    print("reals")
+    print(ys_test)
+    print("************")
+    
+    
+    num_samples_test_set = len(xs_test)
+
+    # Compute the Real Number of Incorrect Predictions, regarding the Estimated Testing Error
+    real_gaussian_naive_bayes_num_incorrect_predictions = 0
+    
+    for current_sample_test in range(num_samples_test_set):
+        if(prediction_classes_for_samples_xs_test[current_sample_test] != ys_test[current_sample_test] ):
+            real_gaussian_naive_bayes_num_incorrect_predictions += 1
+            
+    
+    print("num real incorretos")
+    print(real_gaussian_naive_bayes_num_incorrect_predictions)
+
+    # Return the Real Number of Incorrect Prediction and the Estimated True/Testing Error,
+    # in the Testing Set, for the Gaussian Naïve Bayes
+    return real_gaussian_naive_bayes_num_incorrect_predictions, gaussian_naive_bayes_true_test_error
 
 
 # The Function to Perform the Classification Process for
@@ -1062,9 +1084,9 @@ def do_gaussian_naive_bayes():
         print("- Validation Error = {}".format(gaussian_naive_bayes_valid_error_avg_folds))
         print("\n")
 
-    # Estimate the True/Test Error for the Testing Set,
-    # of the Gaussian Naïve Bayes Classifier
-    estimated_gaussian_naive_bayes_true_test_error = estimate_gaussian_naive_bayes_true_test_error(xs_test_features, ys_test_classes)
+    # Estimate the Estimated Number of Incorrect Predictions and the True/Test Error,
+    # of the Testing Set, for the Gaussian Naïve Bayes Classifier
+    estimated_gaussian_naive_bayes_num_incorrect_predictions, estimated_gaussian_naive_bayes_true_test_error = estimate_gaussian_naive_bayes_true_test_error(xs_test_features, ys_test_classes)
 
     # If the Boolean Flag for Debugging is set to True,
     # print some relevant information
@@ -1073,10 +1095,22 @@ def do_gaussian_naive_bayes():
         print("\n")
         print("- Estimated True/Test Error = {}".format(estimated_gaussian_naive_bayes_true_test_error))
 
-    # TODO
+    
+    # The number of the Samples, from the Testing Set
     num_samples_test_set = len(xs_test_features)  
 
-    aproximate_normal_test(xs_test_features)
+    # Computes the Aproximate Normal Test, for the Gaussain Naïve Bayes Classifier
+    gaussian_naive_bayes_aproximate_normal_test_value, gaussian_naive_bayes_aproximate_normal_test_deviation_lower_bound, gaussian_naive_bayes_aproximate_normal_test_deviation_upper_bound = aproximate_normal_test(estimated_gaussian_naive_bayes_num_incorrect_predictions, estimated_gaussian_naive_bayes_true_test_error, num_samples_test_set)
+    
+    # If the Boolean Flag for Debugging is set to True,
+    # print some relevant information
+    if(DEBUG_FLAG == True):   
+        # Print the Approximate Normal Test, with Confidence Level of 95% and
+        # its Interval range of values, for the Test itself
+        print("\n")
+        print("- Approximate Normal Test, with Confidence Level of 95% = [ {} - {} ; {} + {} ]".format(gaussian_naive_bayes_aproximate_normal_test_value, gaussian_naive_bayes_aproximate_normal_test_deviation_upper_bound, gaussian_naive_bayes_aproximate_normal_test_value, gaussian_naive_bayes_aproximate_normal_test_deviation_upper_bound))
+        print("- Approximate Normal Test Interval = [ {} ; {} ]".format( ( gaussian_naive_bayes_aproximate_normal_test_value + gaussian_naive_bayes_aproximate_normal_test_deviation_lower_bound ) , ( gaussian_naive_bayes_aproximate_normal_test_value + gaussian_naive_bayes_aproximate_normal_test_deviation_upper_bound ) ))
+        
     
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1092,7 +1126,7 @@ def do_gaussian_naive_bayes():
 # \     c) Gaussian Naïve Bayes,                         \
 # \        varying the Bandwidth Parameter               \
 # \                                                      \
-# \  - 4.1) Comparing Aproximate Normal Test             \
+# \  - 4.1) Comparing by the Aproximate Normal Test      \
 # \______________________________________________________\
 
 def aproximate_normal_test(num_real_errors, probability_making_error, num_samples_test_set):
