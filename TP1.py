@@ -411,9 +411,10 @@ def estimate_logistic_regression_true_test_error(xs_train, ys_train, xs_test, ys
             real_logistic_regression_num_incorrect_predictions += 1
             
     
-    # Return the Real Number of Incorrect Predictions and the Estimated True/Test Error,
+    # Return the Predictions of the Samples,
+    # the Real Number of Incorrect Predictions and the Estimated True/Test Error,
     # for the Logistic Regression Classifier
-    return real_logistic_regression_num_incorrect_predictions, estimated_true_test_error
+    return logistic_regression_prediction_classes_for_samples_xs_test, real_logistic_regression_num_incorrect_predictions, estimated_true_test_error
 
 
 # Perform the Classification Process for
@@ -538,9 +539,10 @@ def do_logistic_regression():
     # Plot the Training and Validation Errors, for the Logistic Regression Classifier
     plot_train_valid_error_logistic_regression(logistic_regression_train_error_values, logistic_regression_valid_error_values)
 
-    # Compute the Real Number of Incorrect Predictions and the Estimated True/Test Error,
+    # Compute the Predictions of the Samples,
+    # the Real Number of Incorrect Predictions and the Estimated True/Test Error,
     # of the Testing Set, for the Logistic Regression Classifier
-    real_logistic_regression_num_incorrect_predictions, estimated_logistic_regression_true_test_error = estimate_logistic_regression_true_test_error(xs_train_features, ys_train_classes, xs_test_features, ys_test_classes, logistic_regression_best_c_param_value, 'brier_score')    
+    logistic_regression_prediction_classes_for_samples_xs_test, real_logistic_regression_num_incorrect_predictions, estimated_logistic_regression_true_test_error = estimate_logistic_regression_true_test_error(xs_train_features, ys_train_classes, xs_test_features, ys_test_classes, logistic_regression_best_c_param_value, 'brier_score')    
 
     # If the Boolean Flag for Debugging is set to True,
     # print some relevant information
@@ -549,6 +551,7 @@ def do_logistic_regression():
         # Print the Estimated True/Test Error
         print("\n")
         print("- Estimated True/Test Error = {}".format(estimated_logistic_regression_true_test_error))
+        print("- Number of Incorrect Predictions (Number of real Errors) = {}".format(real_logistic_regression_num_incorrect_predictions))
     
     
     # The number of the Samples, from the Testing Set
@@ -566,6 +569,11 @@ def do_logistic_regression():
         print("- Approximate Normal Test, with Confidence Level of 95% = [ {} - {} ; {} + {} ]".format(real_logistic_regression_num_incorrect_predictions, logistic_regression_aproximate_normal_test_deviation_upper_bound, real_logistic_regression_num_incorrect_predictions, logistic_regression_aproximate_normal_test_deviation_upper_bound))
         print("- Approximate Normal Test Interval = [ {} ; {} ]".format( ( real_logistic_regression_num_incorrect_predictions + logistic_regression_aproximate_normal_test_deviation_lower_bound ) , ( real_logistic_regression_num_incorrect_predictions + logistic_regression_aproximate_normal_test_deviation_upper_bound ) ))
     
+    
+    # Return the Predictions of the Samples,
+    # of the Testing Set, for the Logistic Regression Classifier
+    return logistic_regression_prediction_classes_for_samples_xs_test
+
 
 # -------------------------------------------------------
 # \                                                     \
@@ -896,9 +904,10 @@ def estimate_naive_bayes_true_test_error(xs_test, ys_test, best_bandwidth_param_
             real_naive_bayes_num_incorrect_predictions += 1
     
     
-    # Return the Real Number of Incorrect Predictions and the Estimated True/Test Error,
+    # Return the Predictions of the Samples,
+    # the Real Number of Incorrect Predictions and the Estimated True/Test Error,
     # for the Naïve Bayes Classifier, with custom KDEs (Kernel Density Estimations)
-    return real_naive_bayes_num_incorrect_predictions, naive_bayes_estimated_true_error_test
+    return naive_bayes_prediction_classes_for_samples_xs_test, real_naive_bayes_num_incorrect_predictions, naive_bayes_estimated_true_error_test
 
 
 def do_naive_bayes():
@@ -1002,10 +1011,11 @@ def do_naive_bayes():
     # Plot the Training and Validation Errors, for the Naïve Bayes Classifier
     plot_train_valid_error_naive_bayes(naive_bayes_train_error_values, naive_bayes_valid_error_values)
     
-    # Compute the Real Number of Incorrect Predictions and the Estimated True/Test Error,
+    # Compute the Predictions of the Samples,
+    # the Real Number of Incorrect Predictions and the Estimated True/Test Error,
     # for the Testing Set, of the Naïve Bayes Regression Classifier,
     # with custom KDEs (Kernel Density Estimations)
-    real_naive_bayes_num_incorrect_predictions, estimated_naive_bayes_true_test_error = estimate_naive_bayes_true_test_error(xs_test_features, ys_test_classes, naive_bayes_best_bandwidth_param_value)    
+    naive_bayes_prediction_classes_for_samples_xs_test, real_naive_bayes_num_incorrect_predictions, estimated_naive_bayes_true_test_error = estimate_naive_bayes_true_test_error(xs_test_features, ys_test_classes, naive_bayes_best_bandwidth_param_value)    
     
 
     # If the Boolean Flag for Debugging is set to True,
@@ -1015,6 +1025,7 @@ def do_naive_bayes():
         # Print the Estimated True/Test Error
         print("\n")
         print("- Estimated True/Test Error = {}".format(estimated_naive_bayes_true_test_error))
+        print("- Number of Incorrect Predictions (Number of real Errors) = {}".format(real_naive_bayes_num_incorrect_predictions))
     
     
     # The number of the Samples, from the Testing Set
@@ -1033,7 +1044,13 @@ def do_naive_bayes():
         print("\n")
         print("- Approximate Normal Test, with Confidence Level of 95% = [ {} - {} ; {} + {} ]".format(real_naive_bayes_num_incorrect_predictions, naive_bayes_aproximate_normal_test_deviation_upper_bound, real_naive_bayes_num_incorrect_predictions, naive_bayes_aproximate_normal_test_deviation_upper_bound))
         print("- Approximate Normal Test Interval = [ {} ; {} ]".format( ( real_naive_bayes_num_incorrect_predictions + naive_bayes_aproximate_normal_test_deviation_lower_bound ) , ( real_naive_bayes_num_incorrect_predictions + naive_bayes_aproximate_normal_test_deviation_upper_bound ) ))
-        
+    
+    
+    # Return the Predictions of the Samples,
+    # of the Testing Set, for the Naïve Bayes Classifier, with custom KDEs (Kernel Density Estimations)
+    return naive_bayes_prediction_classes_for_samples_xs_test
+
+    
 
 # -----------------------------------------------------
 # \                                                   \
@@ -1108,9 +1125,10 @@ def estimate_gaussian_naive_bayes_true_test_error(xs_test, ys_test):
             real_gaussian_naive_bayes_num_incorrect_predictions += 1
             
     
-    # Return the Real Number of Incorrect Prediction and the Estimated True/Testing Error,
+    # Return the Predictions of the Samples,
+    # the Real Number of Incorrect Prediction and the Estimated True/Testing Error,
     # in the Testing Set, for the Gaussian Naïve Bayes
-    return real_gaussian_naive_bayes_num_incorrect_predictions, gaussian_naive_bayes_true_test_error
+    return gaussian_naive_bayes_prediction_classes_for_samples_xs_test, real_gaussian_naive_bayes_num_incorrect_predictions, gaussian_naive_bayes_true_test_error
 
 
 # The Function to Perform the Classification Process for
@@ -1159,9 +1177,10 @@ def do_gaussian_naive_bayes():
         print("- Validation Error = {}".format(gaussian_naive_bayes_valid_error_avg_folds))
         print("\n")
 
-    # Compute the Real Number of Incorrect Predictions and the Estimated True/Test Error,
+    # Compute the Predictions of the Samples, 
+    # the Real Number of Incorrect Predictions and the Estimated True/Test Error,
     # of the Testing Set, for the Gaussian Naïve Bayes Classifier
-    real_gaussian_naive_bayes_num_incorrect_predictions, estimated_gaussian_naive_bayes_true_test_error = estimate_gaussian_naive_bayes_true_test_error(xs_test_features, ys_test_classes)
+    gaussian_naive_bayes_prediction_classes_for_samples_xs_test, real_gaussian_naive_bayes_num_incorrect_predictions, estimated_gaussian_naive_bayes_true_test_error = estimate_gaussian_naive_bayes_true_test_error(xs_test_features, ys_test_classes)
 
     # If the Boolean Flag for Debugging is set to True,
     # print some relevant information
@@ -1169,6 +1188,7 @@ def do_gaussian_naive_bayes():
         # Print the Estimated True/Test Error
         print("\n")
         print("- Estimated True/Test Error = {}".format(estimated_gaussian_naive_bayes_true_test_error))
+        print("- Number of Incorrect Predictions (Number of real Errors) = {}".format(real_gaussian_naive_bayes_num_incorrect_predictions))
 
     
     # The number of the Samples, from the Testing Set
@@ -1185,7 +1205,11 @@ def do_gaussian_naive_bayes():
         print("\n")
         print("- Approximate Normal Test, with Confidence Level of 95% = [ {} - {} ; {} + {} ]".format(real_gaussian_naive_bayes_num_incorrect_predictions, gaussian_naive_bayes_aproximate_normal_test_deviation_upper_bound, real_gaussian_naive_bayes_num_incorrect_predictions, gaussian_naive_bayes_aproximate_normal_test_deviation_upper_bound))
         print("- Approximate Normal Test Interval = [ {} ; {} ]".format( ( real_gaussian_naive_bayes_num_incorrect_predictions + gaussian_naive_bayes_aproximate_normal_test_deviation_lower_bound ) , ( real_gaussian_naive_bayes_num_incorrect_predictions + gaussian_naive_bayes_aproximate_normal_test_deviation_upper_bound ) ))
-        
+    
+    
+    # Return the Predictions of the Samples,
+    # of the Testing Set, for the Gaussian Naïve Bayes Classifier
+    return gaussian_naive_bayes_prediction_classes_for_samples_xs_test
     
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1231,6 +1255,46 @@ def aproximate_normal_test(num_real_errors, probability_making_error, num_sample
     return aproximate_normal_test_deviation_lower_bound, aproximate_normal_test_deviation_upper_bound
 
 
+# --------------------------------------------------------
+# \                                                      \
+# \  4) Comparing the Classifiers:                       \
+# \     a) Logistic Regression,                          \
+# \        varying the C Regularization Parameter        \
+# \     b) Naïve Bayes,                                  \
+# \        with custom KDEs (Kernel Density Estimations) \
+# \        varying the Bandwidth Parameter               \
+# \     c) Gaussian Naïve Bayes,                         \
+# \        varying the Bandwidth Parameter               \
+# \                                                      \
+# \  - 4.2) Comparing by the McNemar's Test              \
+# \______________________________________________________\
+
+def mc_nemar_test(prediction_classes_for_samples_xs_test_classifier_1, prediction_classes_for_samples_xs_test_classifier_2):
+    
+    # The Number of Samples of the Testing Set
+    num_samples_test_set = len(xs_test_features)
+    
+    samples_first_classifier_wrong_second_classifier_right_count = 0
+    samples_first_classifier_right_second_classifier_wrong_count = 0
+    
+    for current_sample_test in range(num_samples_test_set):
+        
+        if( ( prediction_classes_for_samples_xs_test_classifier_1[current_sample_test] != ys_test_classes[current_sample_test] ) and ( prediction_classes_for_samples_xs_test_classifier_2[current_sample_test] == ys_test_classes[current_sample_test] ) ):
+            samples_first_classifier_wrong_second_classifier_right_count += 1
+        
+        if( ( prediction_classes_for_samples_xs_test_classifier_1[current_sample_test] == ys_test_classes[current_sample_test] ) and ( prediction_classes_for_samples_xs_test_classifier_2[current_sample_test] != ys_test_classes[current_sample_test] ) ):
+            samples_first_classifier_right_second_classifier_wrong_count += 1
+    
+    
+    mc_nemar_test_dividend = ( ( abs(samples_first_classifier_wrong_second_classifier_right_count - samples_first_classifier_right_second_classifier_wrong_count) - 1) ** 2 )
+    mc_nemar_test_divider = ( samples_first_classifier_wrong_second_classifier_right_count + samples_first_classifier_right_second_classifier_wrong_count )
+    
+    mc_nemar_test_value = ( mc_nemar_test_dividend / mc_nemar_test_divider )
+    
+    
+    return mc_nemar_test_value
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -1238,19 +1302,137 @@ def aproximate_normal_test(num_real_errors, probability_making_error, num_sample
 
 # 1) Logistic Regression,
 #    varying its Regularization C parameter    
-do_logistic_regression()
+logistic_regression_prediction_classes_for_samples_xs_test = do_logistic_regression()
 
 print("\n\n")
 
 
 # 2) Naïve Bayes, with customised KDE (Kernel Density Estimation),
 #    varying its Bandwidth Regularization parameter
-do_naive_bayes()
+naive_bayes_prediction_classes_for_samples_xs_test = do_naive_bayes()
 
 print("\n\n")
 
 
 # 3) Gaussian Naïve Bayes
-do_gaussian_naive_bayes()
+gaussian_naive_bayes_prediction_classes_for_samples_xs_test = do_gaussian_naive_bayes()
 
 print("\n\n")
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+# ---- Extra: McNemar Test Comparisons, between the Classifiers ------
+
+
+print("-----------------------------------------------------------------")
+print("EXTRA: McNemar Test Comparisons, between the Classifiers")
+print("-----------------------------------------------------------------")
+print("\n\n")
+
+
+# a) McNemar Test #1: Logistic Regression Classifier vs. Naïve Bayes Classifier, with custom KDEs
+
+print("Performing McNemar Test: Logistic Regression Classifier vs. Naïve Bayes Classifier, with custom KDEs...")
+
+mc_nemar_test_logistic_regression_vs_naive_bayes_value = mc_nemar_test(logistic_regression_prediction_classes_for_samples_xs_test, naive_bayes_prediction_classes_for_samples_xs_test)
+
+# If the Boolean Flag for Debugging is set to True,
+# print some relevant information
+if(DEBUG_FLAG == True):   
+    # Print the result value for McNemar Test: Logistic Regression Classifier vs. Naïve Bayes Classifier, with custom KDEs
+    print("\n")
+    print("Result of the McNemar Test #1: Logistic Regression Classifier vs. Naïve Bayes Classifier, with custom KDEs:")
+    print("- {}".format(mc_nemar_test_logistic_regression_vs_naive_bayes_value))
+    
+    # If the result value for McNemar Test: Logistic Regression Classifier vs. Naïve Bayes Classifier, with custom KDEs
+    # is higher or equal than 3.84, with a Confidence Level of 95%
+    if(mc_nemar_test_logistic_regression_vs_naive_bayes_value >= 3.84):
+        
+        # The Logistic Regression Classifier and Naïve Bayes Classifier, with custom KDEs, are significantly different
+        print("\n")
+        print("The Logistic Regression Classifier and Naïve Bayes Classifier, with custom KDEs, ARE significantly different!!!")
+    
+    # If the result value for McNemar Test: Logistic Regression Classifier vs. Naïve Bayes Classifier, with custom KDEs
+    # is lower than 3.84, with a Confidence Level of 95%
+    else:
+    
+        # The Logistic Regression Classifier and Naïve Bayes Classifier, with custom KDEs, are not significantly different
+        print("\n")
+        print("The Logistic Regression Classifier and Naïve Bayes Classifier, with custom KDEs, ARE NOT significantly different!!!")
+        
+    print("\n\n")
+    
+    
+# b) McNemar Test #2: Logistic Regression Classifier vs. Gaussian Naïve Bayes Classifier
+
+print("\n\n")
+print("Performing McNemar Test #2: Logistic Regression Classifier vs. Gaussian Naïve Bayes Classifier...")
+
+mc_nemar_test_logistic_regression_vs_gaussian_naive_bayes_value = mc_nemar_test(logistic_regression_prediction_classes_for_samples_xs_test, gaussian_naive_bayes_prediction_classes_for_samples_xs_test)
+
+# If the Boolean Flag for Debugging is set to True,
+# print some relevant information
+if(DEBUG_FLAG == True):   
+    # Print the result value for McNemar Test: Logistic Regression Classifier vs. Gaussian Naïve Bayes Classifier
+    print("\n")
+    print("Result of the McNemar Test: Logistic Regression Classifier vs. Gaussian Naïve Bayes Classifier:")
+    print("- {}".format(mc_nemar_test_logistic_regression_vs_gaussian_naive_bayes_value))
+    
+    # If the result value for McNemar Test: Logistic Regression Classifier vs. Gaussian Naïve Bayes Classifier
+    # is higher or equal than 3.84, with a Confidence Level of 95%
+    if(mc_nemar_test_logistic_regression_vs_gaussian_naive_bayes_value >= 3.84):
+        
+        # The Logistic Regression Classifier and Gaussian Naïve Bayes Classifier, are significantly different
+        print("\n")
+        print("The Logistic Regression Classifier and Gaussian Naïve Bayes Classifier, ARE significantly different!!!")
+    
+    # If the result value for McNemar Test: Logistic Regression Classifier vs. Gaussian Naïve Bayes Classifier
+    # is lower than 3.84, with a Confidence Level of 95%
+    else:
+    
+        # The Logistic Regression Classifier and Gaussian Naïve Bayes Classifier, are not significantly different
+        print("\n")
+        print("The Logistic Regression Classifier and Gaussian Naïve Bayes Classifier, ARE NOT significantly different!!!")
+        
+    print("\n\n")
+    
+    
+# c) McNemar Test #3: Naïve Bayes Classifier, with custom KDEs vs. Gaussian Naïve Bayes Classifier
+
+print("\n\n")
+print("Performing McNemar Test #3: Naïve Bayes Classifier, with custom KDEs vs. Gaussian Naïve Bayes Classifier...")
+
+mc_nemar_test_naive_bayes_vs_gaussian_naive_bayes_value = mc_nemar_test(logistic_regression_prediction_classes_for_samples_xs_test, gaussian_naive_bayes_prediction_classes_for_samples_xs_test)
+
+# If the Boolean Flag for Debugging is set to True,
+# print some relevant information
+if(DEBUG_FLAG == True):   
+    # Print the result value for McNemar Test: Naïve Bayes Classifier, with custom KDEs vs. Gaussian Naïve Bayes Classifier
+    print("\n")
+    print("Result of the McNemar Test: Naïve Bayes Classifier, with custom KDEs vs. Gaussian Naïve Bayes Classifier:")
+    print("- {}".format(mc_nemar_test_naive_bayes_vs_gaussian_naive_bayes_value))
+    
+    # If the result value for McNemar Test: Naïve Bayes Classifier, with custom KDEs vs. Gaussian Naïve Bayes Classifier
+    # is higher or equal than 3.84, with a Confidence Level of 95%
+    if(mc_nemar_test_naive_bayes_vs_gaussian_naive_bayes_value >= 3.84):
+        
+        # The Naïve Bayes Classifier, with custom KDEs and Gaussian Naïve Bayes Classifier, are significantly different
+        print("\n")
+        print("The Logistic Regression Classifier and Gaussian Naïve Bayes Classifier, ARE significantly different!!!")
+    
+    # If the result value for McNemar Test: Naïve Bayes Classifier, with custom KDEs vs. Gaussian Naïve Bayes Classifier
+    # is lower than 3.84, with a Confidence Level of 95%
+    else:
+    
+        # The Naïve Bayes Classifier, with custom KDEs and Gaussian Naïve Bayes Classifier, are not significantly different
+        print("\n")
+        print("The Logistic Regression Classifier and Gaussian Naïve Bayes Classifier, ARE NOT significantly different!!!")
+        
+    print("\n\n")
+    
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
