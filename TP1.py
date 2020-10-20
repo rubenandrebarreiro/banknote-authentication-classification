@@ -1338,7 +1338,7 @@ print("\n\n")
 
 # a) McNemar Test #1: Logistic Regression Classifier vs. Naïve Bayes Classifier, with custom KDEs
 
-print("Performing McNemar Test: Logistic Regression Classifier vs. Naïve Bayes Classifier, with custom KDEs...")
+print("Performing McNemar Test #1: Logistic Regression Classifier vs. Naïve Bayes Classifier, with custom KDEs...")
 
 mc_nemar_test_logistic_regression_vs_naive_bayes_value = mc_nemar_test(logistic_regression_prediction_classes_for_samples_xs_test, naive_bayes_prediction_classes_for_samples_xs_test)
 
@@ -1381,7 +1381,7 @@ mc_nemar_test_logistic_regression_vs_gaussian_naive_bayes_value = mc_nemar_test(
 if(DEBUG_FLAG == True):   
     # Print the result value for McNemar Test: Logistic Regression Classifier vs. Gaussian Naïve Bayes Classifier
     print("\n")
-    print("Result of the McNemar Test: Logistic Regression Classifier vs. Gaussian Naïve Bayes Classifier:")
+    print("Result of the McNemar Test #2: Logistic Regression Classifier vs. Gaussian Naïve Bayes Classifier:")
     print("- {}".format(mc_nemar_test_logistic_regression_vs_gaussian_naive_bayes_value))
     
     # If the result value for McNemar Test: Logistic Regression Classifier vs. Gaussian Naïve Bayes Classifier
@@ -1415,7 +1415,7 @@ mc_nemar_test_naive_bayes_vs_gaussian_naive_bayes_value = mc_nemar_test(naive_ba
 if(DEBUG_FLAG == True):   
     # Print the result value for McNemar Test: Naïve Bayes Classifier, with custom KDEs vs. Gaussian Naïve Bayes Classifier
     print("\n")
-    print("Result of the McNemar Test: Naïve Bayes Classifier, with custom KDEs vs. Gaussian Naïve Bayes Classifier:")
+    print("Result of the McNemar Test #3: Naïve Bayes Classifier, with custom KDEs vs. Gaussian Naïve Bayes Classifier:")
     print("- {}".format(mc_nemar_test_naive_bayes_vs_gaussian_naive_bayes_value))
     
     # If the result value for McNemar Test: Naïve Bayes Classifier, with custom KDEs vs. Gaussian Naïve Bayes Classifier
