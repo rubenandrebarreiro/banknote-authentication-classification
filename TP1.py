@@ -264,12 +264,21 @@ if(DEBUG_FLAG == True):
     print ("\n")
 
 
-# Computing the Means of the Testing Set, randomized
-test_means = np.mean(xs_train_features,axis=0)
+# Standardize the Testing Set, randomized
+xs_test_features_std = ( ( xs_test_features - train_means ) / train_stdevs )
 
-# Computing the Standard Deviations of the Testing Set, randomized
-test_stdevs = np.std(xs_train_features,axis=0)
 
+# If the Boolean Flag for Debugging is set to True,
+# print some relevant information
+if(DEBUG_FLAG == True):
+
+    # Print the Standardized Features of the Data for Testing Set, randomized
+    print("\n")
+    print("The Standardized Features of the Data for Testing Set, randomized:")
+    print(xs_test_features_std)
+    
+    # Print a new/blank line
+    print ("\n")
 
 
 
@@ -542,7 +551,7 @@ def do_logistic_regression():
     # Compute the Predictions of the Samples,
     # the Real Number of Incorrect Predictions and the Estimated True/Test Error,
     # of the Testing Set, for the Logistic Regression Classifier
-    logistic_regression_prediction_classes_for_samples_xs_test, real_logistic_regression_num_incorrect_predictions, estimated_logistic_regression_true_test_error = estimate_logistic_regression_true_test_error(xs_train_features, ys_train_classes, xs_test_features, ys_test_classes, logistic_regression_best_c_param_value, 'brier_score')    
+    logistic_regression_prediction_classes_for_samples_xs_test, real_logistic_regression_num_incorrect_predictions, estimated_logistic_regression_true_test_error = estimate_logistic_regression_true_test_error(xs_train_features_std, ys_train_classes, xs_test_features_std, ys_test_classes, logistic_regression_best_c_param_value, 'brier_score')    
 
     # If the Boolean Flag for Debugging is set to True,
     # print some relevant information
@@ -555,7 +564,7 @@ def do_logistic_regression():
     
     
     # The number of the Samples, from the Testing Set
-    num_samples_test_set = len(xs_test_features)  
+    num_samples_test_set = len(xs_test_features_std)  
 
     # Computes the Aproximate Normal Test, for the Logistic Regression Classifier
     logistic_regression_aproximate_normal_test_deviation_lower_bound, logistic_regression_aproximate_normal_test_deviation_upper_bound = aproximate_normal_test(real_logistic_regression_num_incorrect_predictions, estimated_logistic_regression_true_test_error, num_samples_test_set)
@@ -626,8 +635,6 @@ def compute_naive_bayes_errors(xs, ys, train_idx, valid_idx, bandwidth_param_val
     num_samples_xs_valid = len(xs_valid)
 
     
-    
-    
     # For each possible Class of the Dataset
     for current_class in range(NUM_CLASSES):
         
@@ -635,18 +642,14 @@ def compute_naive_bayes_errors(xs, ys, train_idx, valid_idx, bandwidth_param_val
         # in the whole Training Set
         prior_probability_occurrences_for_current_class_train = ( len(xs_train[ys_train == current_class]) / num_samples_xs_train )
         
+        
         # Compute the Logarithm of Base e of Prior Probabilities of
         # the Occurrence for each Class, in the Training Set, to the respectively List for each Class
         logs_prior_probabilities_classes_occurrences_train_list.append(np.log(prior_probability_occurrences_for_current_class_train))
-            
-        
-        # Compute the Probabilities of the Occurrence for each Class,
-        # in the whole Validation Set
-        prior_probability_occurrences_for_current_class_valid = ( len(xs_valid[ys_valid == current_class]) / num_samples_xs_valid )
         
         # Compute the Logarithm of Base e of Prior Probabilities of
         # the Occurrence for each Class, in the Validation Set, to the respectively List for each Class
-        logs_prior_probabilities_classes_occurrences_valid_list.append(np.log(prior_probability_occurrences_for_current_class_valid))
+        logs_prior_probabilities_classes_occurrences_valid_list.append(np.log(prior_probability_occurrences_for_current_class_train))
         
         
         # For each possible Feature of the Dataset
@@ -657,7 +660,7 @@ def compute_naive_bayes_errors(xs, ys, train_idx, valid_idx, bandwidth_param_val
             kernel_density_estimation = skl_kernel_density(bandwidth=bandwidth_param_value, kernel='gaussian')
                     
             # Fit the Kernel Density Estimation (KDE), with the Training Set
-            kernel_density_estimation.fit(xs[ys == current_class, current_feature].reshape(-1,1))
+            kernel_density_estimation.fit(xs_train[ys_train == current_class, current_feature].reshape(-1,1))
             
             # Append the current Kernel Density Estimation (KDE)
             kernel_density_estimations_list.append(kernel_density_estimation)
@@ -1015,7 +1018,7 @@ def do_naive_bayes():
     # the Real Number of Incorrect Predictions and the Estimated True/Test Error,
     # for the Testing Set, of the Naïve Bayes Regression Classifier,
     # with custom KDEs (Kernel Density Estimations)
-    naive_bayes_prediction_classes_for_samples_xs_test, real_naive_bayes_num_incorrect_predictions, estimated_naive_bayes_true_test_error = estimate_naive_bayes_true_test_error(xs_test_features, ys_test_classes, naive_bayes_best_bandwidth_param_value)    
+    naive_bayes_prediction_classes_for_samples_xs_test, real_naive_bayes_num_incorrect_predictions, estimated_naive_bayes_true_test_error = estimate_naive_bayes_true_test_error(xs_test_features_std, ys_test_classes, naive_bayes_best_bandwidth_param_value)    
     
 
     # If the Boolean Flag for Debugging is set to True,
@@ -1029,7 +1032,7 @@ def do_naive_bayes():
     
     
     # The number of the Samples, from the Testing Set
-    num_samples_test_set = len(xs_test_features)  
+    num_samples_test_set = len(xs_test_features_std)  
 
     # Computes the Aproximate Normal Test,
     # for the Naïve Bayes Classifier,
@@ -1180,7 +1183,7 @@ def do_gaussian_naive_bayes():
     # Compute the Predictions of the Samples, 
     # the Real Number of Incorrect Predictions and the Estimated True/Test Error,
     # of the Testing Set, for the Gaussian Naïve Bayes Classifier
-    gaussian_naive_bayes_prediction_classes_for_samples_xs_test, real_gaussian_naive_bayes_num_incorrect_predictions, estimated_gaussian_naive_bayes_true_test_error = estimate_gaussian_naive_bayes_true_test_error(xs_test_features, ys_test_classes)
+    gaussian_naive_bayes_prediction_classes_for_samples_xs_test, real_gaussian_naive_bayes_num_incorrect_predictions, estimated_gaussian_naive_bayes_true_test_error = estimate_gaussian_naive_bayes_true_test_error(xs_test_features_std, ys_test_classes)
 
     # If the Boolean Flag for Debugging is set to True,
     # print some relevant information
@@ -1192,7 +1195,7 @@ def do_gaussian_naive_bayes():
 
     
     # The number of the Samples, from the Testing Set
-    num_samples_test_set = len(xs_test_features)  
+    num_samples_test_set = len(xs_test_features_std)  
 
     # Computes the Aproximate Normal Test, for the Gaussian Naïve Bayes Classifier
     gaussian_naive_bayes_aproximate_normal_test_deviation_lower_bound, gaussian_naive_bayes_aproximate_normal_test_deviation_upper_bound = aproximate_normal_test(real_gaussian_naive_bayes_num_incorrect_predictions, estimated_gaussian_naive_bayes_true_test_error, num_samples_test_set)
@@ -1272,7 +1275,7 @@ def aproximate_normal_test(num_real_errors, probability_making_error, num_sample
 def mc_nemar_test(prediction_classes_for_samples_xs_test_classifier_1, prediction_classes_for_samples_xs_test_classifier_2):
     
     # The Number of Samples of the Testing Set
-    num_samples_test_set = len(xs_test_features)
+    num_samples_test_set = len(xs_test_features_std)
     
     samples_first_classifier_wrong_second_classifier_right_count = 0
     samples_first_classifier_right_second_classifier_wrong_count = 0
