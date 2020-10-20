@@ -1424,7 +1424,7 @@ if(DEBUG_FLAG == True):
         
         # The Naïve Bayes Classifier, with custom KDEs and Gaussian Naïve Bayes Classifier, are significantly different
         print("\n")
-        print("The Logistic Regression Classifier and Gaussian Naïve Bayes Classifier, ARE significantly different!!!")
+        print("The Naïve Bayes Classifier, with custom KDEs and Gaussian Naïve Bayes Classifier, ARE significantly different!!!")
     
     # If the result value for McNemar Test: Naïve Bayes Classifier, with custom KDEs vs. Gaussian Naïve Bayes Classifier
     # is lower than 3.84, with a Confidence Level of 95%
@@ -1432,7 +1432,7 @@ if(DEBUG_FLAG == True):
     
         # The Naïve Bayes Classifier, with custom KDEs and Gaussian Naïve Bayes Classifier, are not significantly different
         print("\n")
-        print("The Logistic Regression Classifier and Gaussian Naïve Bayes Classifier, ARE NOT significantly different!!!")
+        print("The Naïve Bayes Classifier, with custom KDEs and Gaussian Naïve Bayes Classifier, ARE NOT significantly different!!!")
         
     print("\n\n")
     
