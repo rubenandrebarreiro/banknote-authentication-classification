@@ -1408,7 +1408,7 @@ if(DEBUG_FLAG == True):
 print("\n\n")
 print("Performing McNemar Test #3: Naïve Bayes Classifier, with custom KDEs vs. Gaussian Naïve Bayes Classifier...")
 
-mc_nemar_test_naive_bayes_vs_gaussian_naive_bayes_value = mc_nemar_test(logistic_regression_prediction_classes_for_samples_xs_test, gaussian_naive_bayes_prediction_classes_for_samples_xs_test)
+mc_nemar_test_naive_bayes_vs_gaussian_naive_bayes_value = mc_nemar_test(naive_bayes_prediction_classes_for_samples_xs_test, gaussian_naive_bayes_prediction_classes_for_samples_xs_test)
 
 # If the Boolean Flag for Debugging is set to True,
 # print some relevant information
