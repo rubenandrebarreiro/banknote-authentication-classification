@@ -70,16 +70,10 @@ from sklearn.neighbors import KernelDensity as skl_kernel_density
 from sklearn.naive_bayes import GaussianNB as skl_gaussian_naive_bayes
 
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# Constants
 
-# The Number of Features
-# (i.e., 4 Features, per each Banknote)
-NUM_FEATURES = 4
-
-# The Number of Classes
-# (i.e., 2 Classes possible, per each Banknote, Real or Fake)
-NUM_CLASSES = 2
+# Constants #1
 
 # The Number of Folds, for Stratified K Folds, in Cross-Validation
 NUM_FOLDS = 5
@@ -172,10 +166,10 @@ if(DEBUG_FLAG == True):
 
 
 # Select the Classes of the Training Set, randomized
-ys_train_classes = train_set_data_random[:,NUM_FEATURES]
+ys_train_classes = train_set_data_random[:,-1]
 
 # Select the Features of the Training Set, randomized
-xs_train_features = train_set_data_random[:,0:NUM_FEATURES]
+xs_train_features = train_set_data_random[:,0:-1]
 
 
 # If the Boolean Flag for Debugging is set to True,
@@ -201,10 +195,10 @@ if(DEBUG_FLAG == True):
 
 
 # Select the Classes of the Testing Set, randomized
-ys_test_classes = test_set_data_random[:,NUM_FEATURES]
+ys_test_classes = test_set_data_random[:,-1]
 
 # Select the Features of the Testing Set, randomized
-xs_test_features = test_set_data_random[:,0:NUM_FEATURES]
+xs_test_features = test_set_data_random[:,0:-1]
 
 # The size of the Data for Testing Set, randomized
 test_set_size = len(xs_test_features)
@@ -280,6 +274,22 @@ if(DEBUG_FLAG == True):
     # Print a new/blank line
     print ("\n")
 
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+# Constants #2
+
+# The Number of Features
+# (i.e., 4 Features, per each Banknote)
+NUM_FEATURES = xs_train_features_std.shape[1]
+
+# The Number of Classes
+# (i.e., 2 Classes possible, per each Banknote, Real or Fake)
+NUM_CLASSES = len(set(ys_train_classes))
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 # -----------------------------------------------------
@@ -438,10 +448,12 @@ def do_logistic_regression():
     # The K Folds Combinations Model, for the Stratified K Folds process
     k_folds = skl_model_selection.StratifiedKFold(n_splits = NUM_FOLDS)
     
-    # The Best Regularization Parameter C found
+    # The Best Regularization Parameter C found,
+    # for Logistic Regreession
     logistic_regression_best_c_param_value = 1e10
     
-    # The Best Average of the Validation Error, for
+    # The Best Average of the Validation Error,
+    # for Logistic Regreession
     logistic_regression_best_valid_error_avg_folds = 1e10
     
     
@@ -595,12 +607,15 @@ def do_logistic_regression():
 def compute_naive_bayes_errors(xs, ys, train_idx, valid_idx, bandwidth_param_value):
     
     # Initialise the List of Logarithms of Base e of Prior Probabilities of
-    # the Occurrence for each Class, in the Training Set
-    logs_prior_probabilities_classes_occurrences_train_list = []
+    # the Occurrence for each Class, in the Training Set,
+    # for the Naïve Bayes Classifier, with custom KDEs (Kernel Density Estimations)
+    naive_bayes_logs_prior_probabilities_classes_occurrences_train_list = []
     
     
-    # Initialise the Kernel Density Estimations (KDEs)
-    kernel_density_estimations_list = []
+    # Initialise the Kernel Density Estimation (KDE),
+    # with current Bandwidth Regularization Parameter
+    kernel_density_estimation = skl_kernel_density(bandwidth=bandwidth_param_value, kernel='gaussian')
+    
     
     # In order to compute the Errors of the Naïve Bayes,
     # it's needed to work with each pair of (Class, Feature) 
@@ -609,6 +624,10 @@ def compute_naive_bayes_errors(xs, ys, train_idx, valid_idx, bandwidth_param_val
     # we will need a total of 8 Kernel Density Estimations (KDEs)
     # (2 Classes x 4 Features) = 8 Kernel Density Estimations)
     
+    
+    # The Number of Samples of the whole Training Set
+    num_samples_all_xs_train = len(xs)
+
 
     # The Features of the Training Set
     xs_train = xs[train_idx]
@@ -619,123 +638,90 @@ def compute_naive_bayes_errors(xs, ys, train_idx, valid_idx, bandwidth_param_val
     # The Number of Samples of the Training Set
     num_samples_xs_train = len(xs_train)
     
-
-    # The Features of the Validation Set
-    xs_valid = xs[valid_idx]
     
     # The Classes of the Validation Set
     ys_valid = ys[valid_idx]
     
-    # The Number of Samples of the Validation Set
-    num_samples_xs_valid = len(xs_valid)
-
+    
+    # The Logarithm Densities per each Class,
+    # for the Naïve Bayes Classifier, with custom KDEs (Kernel Density Estimations)
+    naive_bayes_logarithm_densities_per_class = np.zeros((num_samples_all_xs_train, NUM_CLASSES))                                
+    
+    # The Classifications/Predictions of the Samples of the whole Training Set,
+    # for the Naïve Bayes Classifier, with custom KDEs (Kernel Density Estimations)
+    naive_bayes_predictions_all_xs_train_samples = np.zeros((num_samples_all_xs_train))
+    
+    
+    # In order to compute the Errors of the Naïve Bayes,
+    # it's needed to work with each pair of (Class, Feature) 
+    
+    # As, we have 2 classes and 4 features,
+    # we will need a total of 8 Kernel Density Estimations (KDEs)
+    # (2 Classes x 4 Features) = 8 Kernel Density Estimations)
     
     # For each possible Class of the Dataset
     for current_class in range(NUM_CLASSES):
+    
+        # The Samples of the Training Set, for the Current Class
+        xs_train_current_class = xs_train[ys_train == current_class]
         
         # Compute the Probabilities of the Occurrence for each Class,
-        # in the whole Training Set
-        prior_probability_occurrences_for_current_class_train = ( len(xs_train[ys_train == current_class]) / num_samples_xs_train )
-        
-        
+        # in the whole Training Set, for the Naïve Bayes Classifier,
+        # with custom KDEs (Kernel Density Estimations)
+        naive_bayes_prior_probability_occurrences_for_current_class_train = ( len(xs_train[ys_train == current_class]) / num_samples_xs_train )
+                
         # Compute the Logarithm of Base e of Prior Probabilities of
-        # the Occurrence for each Class, in the Training Set, to the respectively List for each Class
-        logs_prior_probabilities_classes_occurrences_train_list.append(np.log(prior_probability_occurrences_for_current_class_train))
+        # the Occurrence for each Class, in the whole Training Set, to the respectively List for each Class,
+        # and append it to the respective List
+        naive_bayes_logs_prior_probabilities_classes_occurrences_train_list.append( np.log(naive_bayes_prior_probability_occurrences_for_current_class_train) )
         
         
         # For each possible Feature of the Dataset
         for current_feature in range(NUM_FEATURES):
-                        
-            # In the case of the Naïve Bayes, the Classifier needs to
-            # be fit with each pair of (Class, Feature)
-            kernel_density_estimation = skl_kernel_density(bandwidth=bandwidth_param_value, kernel='gaussian')
-                    
-            # Fit the Kernel Density Estimation (KDE), with the Training Set
-            kernel_density_estimation.fit(xs_train[ys_train == current_class, current_feature].reshape(-1,1))
             
-            # Append the current Kernel Density Estimation (KDE)
-            kernel_density_estimations_list.append(kernel_density_estimation)
-    
-    
-    # Initialise the array of Probabilities for the Prediction of the Classes,
-    # for all the Samples of the Training Set, full of 0s (zeros)
-    probabilities_prediction_classes_for_samples_xs_train = np.zeros((num_samples_xs_train, NUM_CLASSES))
-    
+            # Fit the current Kernel Density Estimation (KDE), with the whole Training Set,
+            # for the current pair (Class, Feature), for the Naïve Bayes Classifier,
+            # with custom KDEs (Kernel Density Estimations)
+            kernel_density_estimation.fit(xs_train_current_class[:,[current_feature]])
+            
+            # Compute and sum the Logarithm Densities for the current pair (Class, Feature),
+            # for the current KDE (Kernel Density Estimation), for the whole Training Set
+            naive_bayes_logarithm_densities_per_class[:, current_class] += kernel_density_estimation.score_samples(xs[:, [current_feature]])
         
-    # Initialise the array of Probabilities for the Prediction of the Classes,
-    # for all the Samples of the Validation Set, full of 0s (zeros)
-    probabilities_prediction_classes_for_samples_xs_valid = np.zeros((num_samples_xs_valid, NUM_CLASSES))
-    
-    
-    # For each possible Class of the Dataset
-    for current_class in range(NUM_CLASSES):
         
-        # Update the Probabilities of Prediction of the Classes for Samples of the Training Set,
-        # with the Logarithms of the Prior Probabilities of the Occurrence of the current Class, in the Training Set
-        probabilities_prediction_classes_for_samples_xs_train[:, current_class] = logs_prior_probabilities_classes_occurrences_train_list[current_class]
+        # Sum the Logarithm of Base e of Prior Probabilities of
+        # the Occurrence for each Class, in the whole Training Set,
+        # to the Logarithm Densities per each Class,
+        # for the Naïve Bayes Classifier, with custom KDEs (Kernel Density Estimations)
+        naive_bayes_logarithm_densities_per_class[:, current_class] += naive_bayes_logs_prior_probabilities_classes_occurrences_train_list[current_class]
 
-        # Update the Probabilities of Prediction of the Classes for Samples of the Validation Set,
-        # with the Logarithms of the Prior Probabilities of the Occurrence of the current Class, in the Training Set
-        probabilities_prediction_classes_for_samples_xs_valid[:, current_class] = logs_prior_probabilities_classes_occurrences_train_list[current_class]
     
-    
-        # For each possible Class of the Dataset
-        for current_feature in range(NUM_FEATURES):
-            
-            # Select the current Kernel Density Estimation (KDE), in the index ( current_class + current_feature )            
-            current_kernel_density_estimation = kernel_density_estimations_list[ ( current_class + current_feature ) ]
-    
-                    
-            # Score the Sample of the Pair (Class, Feature), i.e.,
-            # compute the Logarithm of Base e of its Density Probability, for the Training Set
-            log_density_probability_score_samples_current_class_feature_in_xs_train = current_kernel_density_estimation.score_samples(xs_train[:, current_feature].reshape(-1,1))
-            
-            # Sum the Logarithm of Base e of the Density Probability of
-            # the Sample of the Pair (Class, Feature), i.e., the Score of the Samples, for the Training Set
-            probabilities_prediction_classes_for_samples_xs_train[:, current_class] += log_density_probability_score_samples_current_class_feature_in_xs_train
-    
-            
-            # Score the Sample of the Pair (Class, Feature), i.e.,
-            # compute the Logarithm of Base e of its Density Probability, for the Validation Set
-            log_density_probability_score_samples_current_class_feature_in_xs_valid = current_kernel_density_estimation.score_samples(xs_valid[:, current_feature].reshape(-1,1))
-            
-            # Sum the Logarithm of Base e of the Density Probability of
-            # the Sample of the Pair (Class, Feature), i.e., the Score of the Samples, for the Validation Set
-            probabilities_prediction_classes_for_samples_xs_valid[:, current_class] += log_density_probability_score_samples_current_class_feature_in_xs_valid
-    
-    
-    # The array of the Predictions of the Classes, for the Samples of the Training Set
-    predictions_xs_train_samples = np.zeros((num_samples_xs_train))
-    
-    # For each Sample of the Training Set, try to predict its Class
-    for current_sample_x_train in range(num_samples_xs_train):
+    # For each Sample of the whole Training Set, try to predict its Class
+    for current_sample_x_all_xs_train in range(num_samples_all_xs_train):
         
-        # Predict the current Sample of the Training Set, as the Maximum Argument (i.e., the Class) of it,
+        # Predict the current Sample of the whole Training Set, as the Maximum Argument (i.e., the Class) of it,
         # i.e. the argument/index with the highest probability of the Predictions of the Classes for each Sample
-        predictions_xs_train_samples[current_sample_x_train] = np.argmax( probabilities_prediction_classes_for_samples_xs_train[current_sample_x_train] )
+        naive_bayes_predictions_all_xs_train_samples[current_sample_x_all_xs_train] = np.argmax( naive_bayes_logarithm_densities_per_class[current_sample_x_all_xs_train] )
     
     
-    # The array of the Predictions of the Classes, for the Samples of the Validation Set
-    predictions_xs_valid_samples = np.zeros((num_samples_xs_valid))
+    # The Classifications/Predictions of the Samples of the Training Set,
+    # for the Naïve Bayes Classifier, with custom KDEs (Kernel Density Estimations)
+    naive_bayes_predictions_xs_train_samples = naive_bayes_predictions_all_xs_train_samples[train_idx]
     
-    # For each Sample of the Validation Set, try to predict its Class
-    for current_sample_x_valid in range(num_samples_xs_valid):
-        
-        # Predict the current Sample of the Validation Set, as the Maximum Argument (i.e., the Class) of it,
-        # i.e. the argument/index with the highest probability of the Predictions of the Classes for each Sample
-        predictions_xs_valid_samples[current_sample_x_valid] = np.argmax( probabilities_prediction_classes_for_samples_xs_valid[current_sample_x_valid] )
-    
-
     # Compute the Accuracy of Score for the Predictions of the Classes for the Training Set  
-    naive_bayes_accuracy_train = skl_accuracy_score(ys_train, predictions_xs_train_samples)
+    naive_bayes_accuracy_train = skl_accuracy_score(ys_train, naive_bayes_predictions_xs_train_samples)
     
     # Compute the Training Error, regarding the Accuracy Score for
     # the Predictions of the Classes for the Training Set  
     naive_bayes_error_train = ( 1 - naive_bayes_accuracy_train )
 
+
+    # The Classifications/Predictions of the Samples of the Validation Set,
+    # for the Naïve Bayes Classifier, with custom KDEs (Kernel Density Estimations)
+    naive_bayes_predictions_xs_valid_samples = naive_bayes_predictions_all_xs_train_samples[valid_idx]
        
     # Compute the Accuracy of Score for the Predictions of the Classes for the Validation Set  
-    naive_bayes_accuracy_valid = skl_accuracy_score(ys_valid, predictions_xs_valid_samples)
+    naive_bayes_accuracy_valid = skl_accuracy_score(ys_valid, naive_bayes_predictions_xs_valid_samples)
     
     # Compute the Validation Error, regarding the Accuracy Score for
     # the Predictions of the Classes for the Validation Set  
@@ -744,7 +730,7 @@ def compute_naive_bayes_errors(xs, ys, train_idx, valid_idx, bandwidth_param_val
     
     # Return the Training and Validation Errors for the Naïve Bayes
     return naive_bayes_error_train, naive_bayes_error_valid
-
+    
 
 # The Function to Plot the Training and Validation, for the Naïve Bayes
 def plot_train_valid_error_naive_bayes(train_error_values, valid_error_values):
@@ -781,94 +767,76 @@ def plot_train_valid_error_naive_bayes(train_error_values, valid_error_values):
 
 # The Function to Estimate the True/Test Error of the Testing Set,
 # for the Naïve Bayes Classifier
-def estimate_naive_bayes_true_test_error(xs_test, ys_test, best_bandwidth_param_value=0.6):
+def estimate_naive_bayes_true_test_error(xs_test, ys_test, best_bandwidth_param_value):
     
     # Initialise the List of Logarithms of Base e of Prior Probabilities of
     # the Occurrence for each Class, in the Testing Set
-    logs_prior_probabilities_classes_occurrences_test_list = []
+    naive_bayes_logs_prior_probabilities_classes_occurrences_test_list = []
     
+    # Initialise the Kernel Density Estimation (KDE),
+    # with current Bandwidth Regularization Parameter
+    kernel_density_estimation = skl_kernel_density(bandwidth=best_bandwidth_param_value, kernel='gaussian')
+        
+        
+    # The Number of Samples, in the Testing Set
+    num_samples_xs_test = len(xs_test)
+  
+    # The Logarithm Densities per each Class, in the Testing Set
+    naive_bayes_logarithm_densities_per_class_test = np.zeros((num_samples_xs_test, NUM_CLASSES))                                
+        
+        
+    # The Classification/Prediction of the Samples, in the Testing Set,
+    # to the respective Classes
+    naive_bayes_prediction_classes_for_samples_xs_test = np.zeros((num_samples_xs_test))
     
-    # Initialise the Kernel Density Estimations (KDEs)
-    kernel_density_estimations_list = []
-    
+
     # In order to compute the Errors of the Naïve Bayes,
     # it's needed to work with each pair of (Class, Feature) 
     
     # As, we have 2 classes and 4 features,
     # we will need a total of 8 Kernel Density Estimations (KDEs)
     # (2 Classes x 4 Features) = 8 Kernel Density Estimations)
-
-
-
-    # The Number of Samples of the Testing Set
-    num_samples_xs_test = len(xs_test)
-    
     
     # For each possible Class of the Dataset
     for current_class in range(NUM_CLASSES):
         
-        # Compute the Probabilities of the Occurrence for each Class,
-        # in the whole Testing Set
-        prior_probability_occurrences_for_current_class_test = ( len(xs_test[ys_test == current_class]) / num_samples_xs_test )
+        xs_test_current_class = xs_test[ys_test == current_class]
         
+        # Compute the Probabilities of the Occurrence for each Class,
+        # in the Testing Set
+        naive_bayes_prior_probability_occurrences_for_current_class_test = ( len(xs_test[ys_test == current_class]) / num_samples_xs_test )
+                
         # Compute the Logarithm of Base e of Prior Probabilities of
-        # the Occurrence for each Class, in the Testing Set, to the respectively List for each Class
-        logs_prior_probabilities_classes_occurrences_test_list.append( np.log(prior_probability_occurrences_for_current_class_test) )
-            
+        # the Occurrence for each Class, in the Testing Set, to the respectively List for each Class,
+        # and append it to the respective List
+        naive_bayes_logs_prior_probabilities_classes_occurrences_test_list.append( np.log(naive_bayes_prior_probability_occurrences_for_current_class_test) )
+        
         
         # For each possible Feature of the Dataset
         for current_feature in range(NUM_FEATURES):
-                        
-            # In the case of the Naïve Bayes, the Classifier needs to
-            # be fit with each pair of (Class, Feature)
-            kernel_density_estimation = skl_kernel_density(bandwidth=best_bandwidth_param_value, kernel='gaussian')
-                    
-            # Fit the Kernel Density Estimation (KDE), with the Training Set
-            kernel_density_estimation.fit(xs_test[ys_test == current_class, current_feature].reshape(-1,1))
             
-            # Append the current Kernel Density Estimation (KDE)
-            kernel_density_estimations_list.append(kernel_density_estimation)
-    
-    
-    # Initialise the array of Probabilities for the Prediction of the Classes,
-    # for all the Samples of the Testing Set, full of 0s (zeros)
-    probabilities_prediction_classes_for_samples_xs_test = np.zeros((num_samples_xs_test, NUM_CLASSES))
-    
-    
-    # For each possible Class of the Dataset
-    for current_class in range(NUM_CLASSES):
+            # Fit the Kernel Density Estimation (KDE), with the Testing Set
+            kernel_density_estimation.fit(xs_test_current_class[:, current_feature].reshape(-1,1))
+          
+            # Compute and sum the Logarithm Densities for the current pair (Class, Feature),
+            # for the current KDE (Kernel Density Estimation), for the Testing Set
+            naive_bayes_logarithm_densities_per_class_test[:, current_class] += kernel_density_estimation.score_samples(xs_test[:, [current_feature]])
         
-        # Update the Probabilities of Prediction of the Classes for Samples of the Testing Set,
-        # with the Logarithms of the Prior Probabilities of the Occurrence of the current Class, in the Testing Set
-        probabilities_prediction_classes_for_samples_xs_test[:, current_class] = logs_prior_probabilities_classes_occurrences_test_list[current_class]
-
-
-        # For each possible Class of the Dataset
-        for current_feature in range(NUM_FEATURES):
-            
-            # Select the current Kernel Density Estimation (KDE), in the index ( current_class + current_feature )            
-            current_kernel_density_estimation = kernel_density_estimations_list[ ( current_class + current_feature ) ]
-    
-                    
-            # Score the Sample of the Pair (Class, Feature), i.e.,
-            # compute the Logarithm of Base e of its Density Probability, for the Testing Set
-            log_density_probability_score_samples_current_class_feature_in_xs_test = current_kernel_density_estimation.score_samples(xs_test[:, current_feature].reshape(-1,1))
-            
-            # Sum the Logarithm of Base e of the Density Probability of
-            # the Sample of the Pair (Class, Feature), i.e., the Score of the Samples, for the Testing Set
-            probabilities_prediction_classes_for_samples_xs_test[:, current_class] += log_density_probability_score_samples_current_class_feature_in_xs_test
-    
         
-    
-    # The array of the Predictions of the Classes, for the Samples of the Testing Set
-    naive_bayes_prediction_classes_for_samples_xs_test = np.zeros((num_samples_xs_test))
+        # Sum the Logarithm of Base e of Prior Probabilities of
+        # the Occurrence for each Class, in the Testing Set,
+        # to the Logarithm Densities per each Class,
+        # for the Naïve Bayes Classifier, with custom KDEs (Kernel Density Estimations)
+        naive_bayes_logarithm_densities_per_class_test[:, current_class] += naive_bayes_logs_prior_probabilities_classes_occurrences_test_list[current_class]
+
     
     # For each Sample of the Testing Set, try to predict its Class
     for current_sample_x_test in range(num_samples_xs_test):
         
         # Predict the current Sample of the Testing Set, as the Maximum Argument (i.e., the Class) of it,
-        # i.e. the argument/index with the highest probability of the Predictions of the Classes for each Sample
-        naive_bayes_prediction_classes_for_samples_xs_test[current_sample_x_test] = np.argmax( probabilities_prediction_classes_for_samples_xs_test[current_sample_x_test] )
+        # i.e. the argument/index with the highest probability of the Predictions of the Classes for each Sample,
+        # in the Testing Set
+        naive_bayes_prediction_classes_for_samples_xs_test[current_sample_x_test] = np.argmax( naive_bayes_logarithm_densities_per_class_test[current_sample_x_test] )
     
     
     # Compute the Accuracy of Score for the Predictions of the Classes for the Testing Set  
@@ -917,38 +885,71 @@ def do_naive_bayes():
     k_folds = skl_model_selection.StratifiedKFold(n_splits = NUM_FOLDS)
     
     
-    naive_bayes_best_valid_error_avg_folds = 1e10
-    
+    # The Best Regularization Parameter Bandwidth found,
+    # for Naïve Bayes, with custom KDEs (Kernel Density Estimations)
     naive_bayes_best_bandwidth_param_value = 1e10
     
+    # The Best Average of the Validation Error,
+    # for Naïve Bayes, with custom KDEs (Kernel Density Estimations)
+    naive_bayes_best_valid_error_avg_folds = 1e10
     
-    naive_bayes_train_error_values = np.zeros((NUM_STEPS_BANDWIDTH_NAIVE_BAYES,2))
-    naive_bayes_valid_error_values = np.zeros((NUM_STEPS_BANDWIDTH_NAIVE_BAYES,2))
+    
+    # The Values of Training and Validation Errors,
+    # for Naïve Bayes, with custom KDEs (Kernel Density Estimations)
+    naive_bayes_train_error_values = np.zeros((NUM_STEPS_BANDWIDTH_NAIVE_BAYES, 2))
+    naive_bayes_valid_error_values = np.zeros((NUM_STEPS_BANDWIDTH_NAIVE_BAYES, 2))
     
     
+    # The initial factor of each Bandwidth Step,
+    # for Naïve Bayes, with custom KDEs (Kernel Density Estimations)
     initial_bandwidth = 2e-2
     
+    # The final factor of each Bandwidth Step,
+    # for Naïve Bayes, with custom KDEs (Kernel Density Estimations)
     final_bandwidth = 6e-1
     
+    # The factor of each Bandwidth Step,
+    # for Naïve Bayes, with custom KDEs (Kernel Density Estimations)
     bandwidth_step = 2e-2
 
-
+    
+    # The Number of the current Bandwidth Step,
+    # for Naïve Bayes, with custom KDEs (Kernel Density Estimations)
     current_step_bandwidth_naive_bayes = 0
 
 
+    # The loop for try all the Regularization Parameter Bandwidths
     for current_bandwidth_param_value in np.arange(initial_bandwidth, ( final_bandwidth + bandwidth_step ), bandwidth_step):
         
-        # The sum of the Training and Validation Errors, for Naïve Bayes
+        # The sum of the Training and Validation Errors,
+        # for Naïve Bayes, with custom KDEs (Kernel Density Estimations)
         naive_bayes_train_error_sum = 0
         naive_bayes_valid_error_sum = 0
         
+        
+        # If the Boolean Flag for Debugging is set to True,
+        # print some relevant information
+        if(DEBUG_FLAG == True):
+        
+            # Print the information about
+            # trying a new Regularization Parameter Bandwidth,
+            # for Naïve Bayes, with custom KDEs (Kernel Density Estimations)
+            print("Trying the Regularization Parameter Bandwidth = {},\nfor Naïve Bayes...".format(current_bandwidth_param_value))
+            print("\n")
+        
+        # The loop for all the combinations of K Folds, in the Stratified K Folds process
         for train_idx, valid_idx in k_folds.split(ys_train_classes, ys_train_classes):
             
+            # Compute the Training and Validation Errors, for Naïve Bayes,
+            # with custom KDEs (Kernel Density Estimations)
             naive_bayes_train_error, naive_bayes_valid_error = compute_naive_bayes_errors(xs_train_features_std, ys_train_classes, train_idx, valid_idx, current_bandwidth_param_value)
             
+            # Sum the current Training and Validation Errors to the Sums of them
             naive_bayes_train_error_sum += naive_bayes_train_error
             naive_bayes_valid_error_sum += naive_bayes_valid_error
             
+            
+        # Compute the Average of the Sums of the Training and Validation Errors, by the Total Number of Folds
         naive_bayes_train_error_avg_folds = ( naive_bayes_train_error_sum / NUM_FOLDS )
         naive_bayes_valid_error_avg_folds = ( naive_bayes_valid_error_sum / NUM_FOLDS )
 
