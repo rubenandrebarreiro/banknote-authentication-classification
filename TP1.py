@@ -767,7 +767,7 @@ def plot_train_valid_error_naive_bayes(train_error_values, valid_error_values):
 
 # The Function to Estimate the True/Test Error of the Testing Set,
 # for the Naïve Bayes Classifier
-def estimate_naive_bayes_true_test_error(xs_test, ys_test, best_bandwidth_param_value):
+def estimate_naive_bayes_true_test_error(xs_train, ys_train, xs_test, ys_test, best_bandwidth_param_value):
     
     # Initialise the List of Logarithms of Base e of Prior Probabilities of
     # the Occurrence for each Class, in the Testing Set
@@ -777,7 +777,7 @@ def estimate_naive_bayes_true_test_error(xs_test, ys_test, best_bandwidth_param_
     # with current Bandwidth Regularization Parameter
     kernel_density_estimation = skl_kernel_density(bandwidth=best_bandwidth_param_value, kernel='gaussian')
         
-        
+    # TODO len(train) ou len(test) ???    
     # The Number of Samples, in the Testing Set
     num_samples_xs_test = len(xs_test)
   
@@ -800,23 +800,23 @@ def estimate_naive_bayes_true_test_error(xs_test, ys_test, best_bandwidth_param_
     # For each possible Class of the Dataset
     for current_class in range(NUM_CLASSES):
         
-        xs_test_current_class = xs_test[ys_test == current_class]
+        xs_train_current_class = xs_train[ys_train == current_class]
         
         # Compute the Probabilities of the Occurrence for each Class,
         # in the Testing Set
-        naive_bayes_prior_probability_occurrences_for_current_class_test = ( len(xs_test[ys_test == current_class]) / num_samples_xs_test )
+        naive_bayes_prior_probability_occurrences_for_current_class_train = ( len(xs_train[ys_train == current_class]) / num_samples_xs_test )
                 
         # Compute the Logarithm of Base e of Prior Probabilities of
         # the Occurrence for each Class, in the Testing Set, to the respectively List for each Class,
         # and append it to the respective List
-        naive_bayes_logs_prior_probabilities_classes_occurrences_test_list.append( np.log(naive_bayes_prior_probability_occurrences_for_current_class_test) )
+        naive_bayes_logs_prior_probabilities_classes_occurrences_test_list.append( np.log(naive_bayes_prior_probability_occurrences_for_current_class_train) )
         
         
         # For each possible Feature of the Dataset
         for current_feature in range(NUM_FEATURES):
             
             # Fit the Kernel Density Estimation (KDE), with the Testing Set
-            kernel_density_estimation.fit(xs_test_current_class[:, current_feature].reshape(-1,1))
+            kernel_density_estimation.fit(xs_train_current_class[:, current_feature].reshape(-1,1))
           
             # Compute and sum the Logarithm Densities for the current pair (Class, Feature),
             # for the current KDE (Kernel Density Estimation), for the Testing Set
@@ -1011,7 +1011,7 @@ def do_naive_bayes():
     # the Real Number of Incorrect Predictions and the Estimated True/Test Error,
     # for the Testing Set, of the Naïve Bayes Regression Classifier,
     # with custom KDEs (Kernel Density Estimations)
-    naive_bayes_prediction_classes_for_samples_xs_test, real_naive_bayes_num_incorrect_predictions, estimated_naive_bayes_true_test_error = estimate_naive_bayes_true_test_error(xs_test_features_std, ys_test_classes, naive_bayes_best_bandwidth_param_value)    
+    naive_bayes_prediction_classes_for_samples_xs_test, real_naive_bayes_num_incorrect_predictions, estimated_naive_bayes_true_test_error = estimate_naive_bayes_true_test_error(xs_train_features_std, ys_train_classes, xs_test_features_std, ys_test_classes, naive_bayes_best_bandwidth_param_value)    
     
 
     # If the Boolean Flag for Debugging is set to True,
@@ -1083,13 +1083,13 @@ def compute_gaussian_naive_bayes_errors(gaussian_naive_bayes, xs, ys, train_idx,
 
 # The Function to Estimate the True/Test Error of the Testing Set,
 # for the Gaussian Naïve Bayes Classifier
-def estimate_gaussian_naive_bayes_true_test_error(xs_test, ys_test):
+def estimate_gaussian_naive_bayes_true_test_error(xs_train, ys_train, xs_test, ys_test):
     
     # Initialise the Gaussian Naïve Bayes Classifier
     gaussian_naive_bayes = skl_gaussian_naive_bayes()
     
     # Fit the Gaussian Naïve Bayes, with the Testing Set
-    gaussian_naive_bayes.fit(xs_test, ys_test)
+    gaussian_naive_bayes.fit(xs_train, ys_train)
     
     # Predict and Classify the Values of the Testing Set,
     # with the Gaussian Naïve Bayes Classifier TODO Confirmar
@@ -1176,7 +1176,7 @@ def do_gaussian_naive_bayes():
     # Compute the Predictions of the Samples, 
     # the Real Number of Incorrect Predictions and the Estimated True/Test Error,
     # of the Testing Set, for the Gaussian Naïve Bayes Classifier
-    gaussian_naive_bayes_prediction_classes_for_samples_xs_test, real_gaussian_naive_bayes_num_incorrect_predictions, estimated_gaussian_naive_bayes_true_test_error = estimate_gaussian_naive_bayes_true_test_error(xs_test_features_std, ys_test_classes)
+    gaussian_naive_bayes_prediction_classes_for_samples_xs_test, real_gaussian_naive_bayes_num_incorrect_predictions, estimated_gaussian_naive_bayes_true_test_error = estimate_gaussian_naive_bayes_true_test_error(xs_train_features_std, ys_train_classes, xs_test_features_std, ys_test_classes)
 
     # If the Boolean Flag for Debugging is set to True,
     # print some relevant information
