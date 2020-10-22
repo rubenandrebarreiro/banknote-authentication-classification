@@ -170,8 +170,9 @@ def plot_train_valid_error_naive_bayes(train_error_values, valid_error_values):
 # for the Naïve Bayes Classifier
 def estimate_naive_bayes_true_test_error(xs_train, ys_train, xs_test, ys_test, best_bandwidth, num_classes, num_features):
     
+    num_samples_xs_train = len(xs_train)                                            # The Number of Samples, in the Training Set
     num_samples_xs_test = len(xs_test)                                              # The Number of Samples, in the Testing Set
-    nb_logs_prior_prob_classes_occurrences_test_list = []                           # Initialise the List of Logarithms of Base e of Prior Probabilities of the Occurrence for each Class, in the Testing Set
+    nb_logs_prior_prob_classes_occurrences_train_list = []                          # Initialise the List of Logarithms of Base e of Prior Probabilities of the Occurrence for each Class, in the Training Set
     kde = skl_kernel_density(bandwidth=best_bandwidth, kernel='gaussian')           # Initialise the Kernel Density Estimation (KDE), with current Bandwidth Regularization Parameter   
     nb_log_densities_per_class_test = np.zeros((num_samples_xs_test, num_classes))  # The Logarithm Densities per each Class, in the Testing Set                           
     nb_predict_classes_xs_test = np.zeros((num_samples_xs_test))                    # The Classification/Prediction of the Samples, in the Testing Set, to the respective Classes
@@ -186,11 +187,11 @@ def estimate_naive_bayes_true_test_error(xs_train, ys_train, xs_test, ys_test, b
         
         xs_train_current_class = xs_train[ys_train == current_class]
         
-        # Compute the Probabilities of the Occurrence for each Class, in the Testing Set
-        nb_prior_prob_occurrences_for_current_class_test = ( len(xs_train[ys_train == current_class]) / num_samples_xs_test )
+        # Compute the Probabilities of the Occurrence for each Class, in the Training Set
+        nb_prior_prob_occurrences_for_current_class_train = ( len(xs_train[ys_train == current_class]) / num_samples_xs_train )
                 
         # Compute the Logarithm of Base e of Prior Probabilities of the Occurrence for each Class, in the Testing Set, to the respectively List for each Class, and append it to the respective List
-        nb_logs_prior_prob_classes_occurrences_test_list.append( np.log(nb_prior_prob_occurrences_for_current_class_test) )
+        nb_logs_prior_prob_classes_occurrences_train_list.append( np.log(nb_prior_prob_occurrences_for_current_class_train) )
         
 
         # For each possible Feature of the Dataset
@@ -205,7 +206,7 @@ def estimate_naive_bayes_true_test_error(xs_train, ys_train, xs_test, ys_test, b
         
         # Sum the Logarithm of Base e of Prior Probabilities of the Occurrence for each Class, in the Testing Set,
         # to the Logarithm Densities per each Class, for the Naïve Bayes Classifier, with custom KDEs (Kernel Density Estimations)
-        nb_log_densities_per_class_test[:, current_class] += nb_logs_prior_prob_classes_occurrences_test_list[current_class]
+        nb_log_densities_per_class_test[:, current_class] += nb_logs_prior_prob_classes_occurrences_train_list[current_class]
 
     
     # For each Sample of the Testing Set, try to predict its Class
