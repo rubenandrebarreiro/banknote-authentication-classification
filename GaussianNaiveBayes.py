@@ -55,7 +55,6 @@ def compute_gaussian_naive_bayes_errors(gnb, xs, ys, train_idx, valid_idx):
 # The Function to Estimate the True/Test Error of the Testing Set, for the Gaussian Naïve Bayes Classifier
 def estimate_gaussian_naive_bayes_true_test_error(xs_train, ys_train, xs_test, ys_test):
     
-    
     gnb = skl_gaussian_naive_bayes()                          # Initialise the Gaussian Naïve Bayes Classifier
     gnb.fit(xs_train, ys_train)                                 # Fit the Gaussian Naïve Bayes, with the Testing Set
     gnb_predict_classes_xs_test = gnb.predict(xs_test)        # Predict and Classify the Values of the Testing Set, with the Gaussian Naïve Bayes Classifier TODO Confirmar

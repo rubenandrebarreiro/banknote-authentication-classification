@@ -40,8 +40,9 @@ import math as mathematics
 import sklearn as skl
 
 
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 # Constants #1
 
 
@@ -51,7 +52,7 @@ NUM_FOLDS = 5
 # The Number of Steps/Variations for ajusting the C Regularization parameter, for the Logistic Regression
 NUM_STEPS_C_REGULARIZATION_LOGISTIC_REGRESSION = 15
 
-# The Number of Steps/Variations for ajusting the Bandwidth parameter, for the Naïve Bayes
+# The Number of Steps/Variations for ajusting the Bandwidth Hyperparameter, for the Naïve Bayes
 NUM_STEPS_BANDWIDTH_NAIVE_BAYES = 30
 
 # The Boolean Flag for Debugging
@@ -59,9 +60,9 @@ DEBUG_FLAG = True
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 # The files of the Datasets for Training and Testing
-
-
 train_set_data_file = "files/data/TP1_train.tsv"                               # The Data for Training Set
 test_set_data_file = "files/data/TP1_test.tsv"                                 # The Data for Testing Set
 
@@ -87,8 +88,9 @@ xs_train_features_std = ( ( xs_train_features - train_means ) / train_stdevs ) #
 xs_test_features_std = ( ( xs_test_features - train_means ) / train_stdevs )   # Standardize the Testing Set, randomized
 
 
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 # Constants #2
 
 
@@ -111,9 +113,8 @@ num_samples_test_set = len(xs_test_features_std)
 # \        varying the C Regularization Parameter        \
 # \     b) Naïve Bayes,                                  \
 # \        with custom KDEs (Kernel Density Estimations) \
-# \        varying the Bandwidth Parameter               \
-# \     c) Gaussian Naïve Bayes,                         \
-# \        varying the Bandwidth Parameter               \
+# \        varying the Bandwidth Hyperparameter          \
+# \     c) Gaussian Naïve Bayes                          \
 # \                                                      \
 # \  - 4.1) Comparing by the Aproximate Normal Test      \
 # \______________________________________________________\
@@ -131,6 +132,9 @@ def aproximate_normal_test(num_real_errors, prob_making_error, num_samples_test_
     return NormalTest_LowerDeviation, NormalTest_UpperDeviation
 
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 # --------------------------------------------------------
 # \                                                      \
 # \  4) Comparing the Classifiers:                       \
@@ -138,9 +142,8 @@ def aproximate_normal_test(num_real_errors, prob_making_error, num_samples_test_
 # \        varying the C Regularization Parameter        \
 # \     b) Naïve Bayes,                                  \
 # \        with custom KDEs (Kernel Density Estimations) \
-# \        varying the Bandwidth Parameter               \
-# \     c) Gaussian Naïve Bayes,                         \
-# \        varying the Bandwidth Parameter               \
+# \        varying the Bandwidth Hyperparameter          \
+# \     c) Gaussian Naïve Bayes                          \
 # \                                                      \
 # \  - 4.2) Comparing by the McNemar's Test              \
 # \______________________________________________________\
@@ -170,12 +173,10 @@ def mc_nemar_test(predict_classes_xs_test_1, predict_classes_xs_test_2):
     return mc_nemar_test_value
 
 
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 # ---- Run the 3 Classifiers: ------
-
-
-
 
 # 1) Computes the Logistic Regression Classifier
 logReg_train_error_avg_folds, logReg_valid_error_avg_folds, logReg_best_c, logReg_best_valid_error_avg_folds, logReg_predict_classes_xs_test, logReg_num_incorrect_predictions, estimated_logReg_true_test_error = do_logistic_regression(xs_test_features_std, ys_train_classes, xs_train_features_std, ys_test_classes, NUM_FEATURES)
@@ -199,6 +200,7 @@ gnb_NormalTest_LowerDeviation, gnb_NormalTest_UpperDeviation = aproximate_normal
   
 
 #--------------- Logistic Regression -------------------------------------#
+
 print("-----------------------------------------------------------------")
 print("1) Starting the Logistic Regression Classifier...")
 print("-----------------------------------------------------------------")
@@ -210,7 +212,7 @@ print("- Validation Error = {}".format(logReg_valid_error_avg_folds))
 
 # Print the Best Value for the Regularization C Parameter
 print("\n")
-print("Best Value for Regularization C = {} :".format(logReg_best_c))
+print("Best Value for Regularization C Parameter = {} :".format(logReg_best_c))
 print("- Best Validation Error = {}".format(logReg_best_valid_error_avg_folds))
 
 # Print the Estimated True/Test Error
@@ -223,12 +225,12 @@ print("\n")
 print("- Approximate Normal Test, with Confidence Level of 95% = [ {} - {} ; {} + {} ]".format(logReg_num_incorrect_predictions, logReg_normalTest_UpperDeviation, logReg_num_incorrect_predictions, logReg_normalTest_UpperDeviation))
 print("- Approximate Normal Test Interval = [ {} ; {} ]".format( ( logReg_num_incorrect_predictions + logReg_normalTest_LowDeviation ) , ( logReg_num_incorrect_predictions + logReg_normalTest_UpperDeviation ) ))
 print("\n\n")
+
 #--------------- Logistic Regression -------------------------------------#
 
 
-
-
 #--------------- Naive Bayes ---------------------------------------------#
+
 print("-----------------------------------------------------------------")
 print("2) Starting the Naïve Bayes Classifier...")
 print("-----------------------------------------------------------------")
@@ -238,9 +240,9 @@ print("\n")
 print("- Training Error = {}".format(nb_train_error_avg_folds))
 print("- Validation Error = {}".format(nb_valid_error_avg_folds))
 
-# Print the Best Value for the Regularization Bandwidth Parameter
+# Print the Best Value for the Bandwidth Hyperparameter
 print("\n")
-print("Best Value for Regularization Bandwidth = {} :".format(nb_best_bandwidth))
+print("Best Value for Bandwidth Hyperparameter = {} :".format(nb_best_bandwidth))
 print("- Best Validation Error = {}".format(nb_best_valid_error_avg_folds))
 
 # Print the Estimated True/Test Error
@@ -253,12 +255,12 @@ print("\n")
 print("- Approximate Normal Test, with Confidence Level of 95% = [ {} - {} ; {} + {} ]".format(nb_num_incorrect_predict, nb_NormalTest_UpperDeviation, nb_num_incorrect_predict, nb_NormalTest_UpperDeviation))
 print("- Approximate Normal Test Interval = [ {} ; {} ]".format( ( nb_num_incorrect_predict + nb_NormalTest_LowerDeviation ) , ( nb_num_incorrect_predict + nb_NormalTest_UpperDeviation ) ))
 print("\n\n")
+
 #--------------- Naive Bayes ---------------------------------------------#
 
 
-
-
 #--------------- Gaussian Naive Bayes ------------------------------------#
+
 print("-----------------------------------------------------------------")
 print("3) Starting the Gaussian Naïve Bayes Classifier...")
 print("-----------------------------------------------------------------")
@@ -278,13 +280,11 @@ print("\n")
 print("- Approximate Normal Test, with Confidence Level of 95% = [ {} - {} ; {} + {} ]".format(gnb_num_incorrect_predict, gnb_NormalTest_UpperDeviation, gnb_num_incorrect_predict, gnb_NormalTest_UpperDeviation))
 print("- Approximate Normal Test Interval = [ {} ; {} ]".format( ( gnb_num_incorrect_predict + gnb_NormalTest_LowerDeviation ) , ( gnb_num_incorrect_predict + gnb_NormalTest_UpperDeviation ) ))
 print("\n\n")
+
 #--------------- Gaussian Naive Bayes ------------------------------------#
 
 
-
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 
 
 # ---- Extra: McNemar Test Comparisons, between the Classifiers ------
@@ -300,8 +300,8 @@ print("-----------------------------------------------------------------")
 print("\n\n")
 
 
-
 #-----------------------------------------Logistic Regression vs Naive Bayes ------------------------------------------------------#
+
 # a) McNemar Test #1: Logistic Regression Classifier vs. Naïve Bayes Classifier, with custom KDEs
 
 print("Performing McNemar Test #1: Logistic Regression Classifier vs. Naïve Bayes Classifier, with custom KDEs...")
@@ -324,12 +324,12 @@ else:
     # The Logistic Regression Classifier and Naïve Bayes Classifier, with custom KDEs, are not significantly different
     print("\n")
     print("The Logistic Regression Classifier and Naïve Bayes Classifier, with custom KDEs, ARE NOT significantly different!!!")
+
 #-----------------------------------------Logistic Regression vs Naive Bayes ------------------------------------------------------#
-   
- 
-   
+    
  
 #-----------------------------------------Logistic Regression vs Gaussian Naive Bayes ---------------------------------------------#
+
 # b) McNemar Test #2: Logistic Regression Classifier vs. Gaussian Naïve Bayes Classifier
 
 print("\n\n")
@@ -354,11 +354,12 @@ else:
    # The Logistic Regression Classifier and Gaussian Naïve Bayes Classifier, are not significantly different
    print("\n")
    print("The Logistic Regression Classifier and Gaussian Naïve Bayes Classifier, ARE NOT significantly different!!!")
+
 #-----------------------------------------Logistic Regression vs Gaussian Naive Bayes ---------------------------------------------#
   
 
-
 #-----------------------------------------Naive Bayes vs Gaussian Naive Bayes -----------------------------------------------------#  
+
 # c) McNemar Test #3: Naïve Bayes Classifier, with custom KDEs vs. Gaussian Naïve Bayes Classifier
 
 print("\n\n")
@@ -382,6 +383,7 @@ else:
     # The Naïve Bayes Classifier, with custom KDEs and Gaussian Naïve Bayes Classifier, are not significantly different
     print("\n")
     print("The Naïve Bayes Classifier, with custom KDEs and Gaussian Naïve Bayes Classifier, ARE NOT significantly different!!!")   
+
 #-----------------------------------------Naive Bayes vs Gaussian Naive Bayes -----------------------------------------------------#  
 
 

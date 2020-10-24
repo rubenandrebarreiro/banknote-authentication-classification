@@ -48,7 +48,7 @@ NUM_STEPS_BANDWIDTH_NAIVE_BAYES = 30
 # \                                                     \
 # \  Classifier 2) - Naïve Bayes,                       \
 # \  with customised KDEs (Kernel Density Estimations), \
-# \  varying its Bandwidth Regularization parameter     \
+# \  varying its Bandwidth Hyperparameter     \
 # \_____________________________________________________\
 
 # The Function to compute the 
@@ -59,7 +59,7 @@ def compute_naive_bayes_errors(xs, ys, train_idx, valid_idx, bandwidth, num_clas
     # for the Naïve Bayes Classifier, with custom KDEs (Kernel Density Estimations)
     nb_logs_prior_prob_classes_occurrences_train_list = []
    
-    kde = skl_kernel_density(bandwidth=bandwidth, kernel='gaussian')  # Initialise the Kernel Density Estimation (KDE) with current Bandwidth Regularization Parameter
+    kde = skl_kernel_density(bandwidth=bandwidth, kernel='gaussian')  # Initialise the Kernel Density Estimation (KDE) with current Bandwidth Hyperparameter
     
     
     # In order to compute the Errors of the Naïve Bayes, it's needed to work with each pair of (Class, Feature) 
@@ -173,7 +173,7 @@ def estimate_naive_bayes_true_test_error(xs_train, ys_train, xs_test, ys_test, b
     num_samples_xs_train = len(xs_train)                                            # The Number of Samples, in the Training Set
     num_samples_xs_test = len(xs_test)                                              # The Number of Samples, in the Testing Set
     nb_logs_prior_prob_classes_occurrences_train_list = []                          # Initialise the List of Logarithms of Base e of Prior Probabilities of the Occurrence for each Class, in the Training Set
-    kde = skl_kernel_density(bandwidth=best_bandwidth, kernel='gaussian')           # Initialise the Kernel Density Estimation (KDE), with current Bandwidth Regularization Parameter   
+    kde = skl_kernel_density(bandwidth=best_bandwidth, kernel='gaussian')           # Initialise the Kernel Density Estimation (KDE), with current Bandwidth Hyperparameter   
     nb_log_densities_per_class_test = np.zeros((num_samples_xs_test, num_classes))  # The Logarithm Densities per each Class, in the Testing Set                           
     nb_predict_classes_xs_test = np.zeros((num_samples_xs_test))                    # The Classification/Prediction of the Samples, in the Testing Set, to the respective Classes
     
@@ -252,7 +252,7 @@ def do_naive_bayes(ys_train_classes, xs_train_features_std, xs_test_features_std
     nb_valid_error_values = np.zeros((NUM_STEPS_BANDWIDTH_NAIVE_BAYES, 2))     # for Naïve Bayes, with custom KDEs (Kernel Density Estimations)
     
     
-    nb_best_bandwidth = 1e10                        # The Best Regularization Parameter Bandwidth found, for Naïve Bayes, with custom KDEs (Kernel Density Estimations)
+    nb_best_bandwidth = 1e10                        # The Best Hyperparameter Bandwidth found, for Naïve Bayes, with custom KDEs (Kernel Density Estimations)
     nb_best_valid_error_avg_folds = 1e10            # The Best Average of the Validation Error, for Naïve Bayes, with custom KDEs (Kernel Density Estimations)
     initial_bandwidth = 2e-2                        # The initial factor of each Bandwidth Step, for Naïve Bayes, with custom KDEs (Kernel Density Estimations)
     final_bandwidth = 6e-1                          # The final factor of each Bandwidth Step, for Naïve Bayes, with custom KDEs (Kernel Density Estimations)
@@ -260,7 +260,7 @@ def do_naive_bayes(ys_train_classes, xs_train_features_std, xs_test_features_std
     current_step_bandwidth_nb = 0                   # The Number of the current Bandwidth Step, for Naïve Bayes, with custom KDEs (Kernel Density Estimations)
 
 
-    # The loop for try all the Regularization Parameter Bandwidths
+    # The loop for try all the Hyperparameter Bandwidths
     for current_bandwidth in np.arange(initial_bandwidth, ( final_bandwidth + bandwidth_step ), bandwidth_step):
         
         nb_train_error_sum = 0     # The sum of the Training and Validation Errors,
@@ -282,7 +282,7 @@ def do_naive_bayes(ys_train_classes, xs_train_features_std, xs_test_features_std
         nb_valid_error_avg_folds = ( nb_valid_error_sum / NUM_FOLDS )                      #Training and Validation Errors, by the Total Number of Folds
             
        
-        if(nb_best_valid_error_avg_folds > nb_valid_error_avg_folds):                      # Updates the Best Validation Error and also, the Best Regularization Bandwidth Parameter
+        if(nb_best_valid_error_avg_folds > nb_valid_error_avg_folds):                      # Updates the Best Validation Error and also, the Best Bandwidth Hyperparameter
             nb_best_valid_error_avg_folds = nb_valid_error_avg_folds
             nb_best_bandwidth = current_bandwidth
             
