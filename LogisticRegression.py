@@ -125,7 +125,7 @@ def estimate_logReg_true_test_error(xs_train, ys_train, xs_test, ys_test, num_fe
     logReg = skl_logistic_regression(C=best_c_param_value, tol=1e-10)               # Initialise the Logistic Regression Classifier, for the Best Regularization C Parameter found
     logReg.fit(xs_train[:,:num_features], ys_train)                                 # Fit the Logistic Regression Classifier with the Training Set
     ys_logReg_predict_prob = logReg.predict_proba(xs_test[:,:num_features])[:,1]    # Predict the Probabilities of the Features of the Testing Set, belongs to a certain Class
-    logReg_predict_classes_xs_test = logReg.predict(xs_test)                        # Predict and Classify the Values of the Testing Set, with the Logistic Regression Classifier TODO Confirmar
+    logReg_predict_classes_xs_test = logReg.predict(xs_test)                        # Predict and Classify the Values of the Testing Set, with the Logistic Regression Classifier
     
     
     # Estimate the Testing Error, based on a certain type of Scoring
